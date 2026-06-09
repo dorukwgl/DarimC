@@ -1,0 +1,88 @@
+package com.doruk.lexer;
+
+public enum TokenType {
+    // LITERALS & IDENTIFIERS
+    IDENTIFIER,
+    NULL,
+    NUMBER_LITERAL,
+    STRING_LITERAL,
+    BOOL_LITERAL,
+
+    // TYPE KEYWORDS
+    NUM,
+    STRING,
+    BOOL,
+    VOID,
+    ANY,
+
+    // DECLARATION KEYWORDS
+    FUN,
+    VAR,
+    FINAL,
+    NEW,
+
+
+    // CONTROL FLOW KEYWORDS
+    IF,
+    ELSE,
+    FOR,
+    WHILE,
+    RETURN,
+    CONTINUE,
+    BREAK,
+
+    // BOOLEAN
+    TRUE,
+    FALSE,
+
+    // ARITHMETIC KEYWORDS
+    PLUS,
+    MINUS,
+    STAR,
+    SLASH,
+    SLASH_SLASH,
+    MODULO,
+    POW,
+
+    // COMPARISON OPERATORS
+    GREATER,
+    GREATER_EQUAL,
+    LESS,
+    LESS_EQUAL,
+    EQUAL_EQUAL,
+    NOT_EQUAL,
+
+
+    // ASSIGNMENT OPERATORS
+    PLUS_EQUAL,
+    MINUS_EQUAL,
+    STAR_EQUAL,
+    SLASH_EQUAL,
+    EQUAL,
+
+    // LOGICAL OPERATORS
+    AND,
+    OR,
+    NOT,
+
+    // INCREMENT DECREMENT OPERATORS
+    PLUS_PLUS,
+    MINUS_MINUS,
+
+    // DELIMITERS
+    LEFT_PAREN,
+    RIGHT_PAREN,
+    LEFT_BRACE,
+    RIGHT_BRACE,
+    LEFT_BRACKET,
+    RIGHT_BRACKET,
+
+    // SEPARATORS
+    COMMA,
+    SEMICOLON,
+    COLON,
+    DOT,
+
+    // SPECIAL
+    EOF,
+}

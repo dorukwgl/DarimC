@@ -15,18 +15,32 @@ public class Main {
         System.out.print("Options:");
         System.out.println(parser.getOptions());
     }
-    public static void main(String[] args) {
+
+    static void main(String[] args) {
+        var parser = createCliOptionParser();
+        parser.parse(args);
+
+        if (parser.containsFlag("h") || parser.containsFlag("help")) {
+            printHelp(parser);
+            return;
+        }
+        if (parser.containsFlag("v") || parser.containsFlag("version")) {
+            System.out.println("Darimc - Version 0.1.0");
+            return;
+        }
+
+        new Compiler(parser);
+    }
+
+    private static ArgParser createCliOptionParser() {
         var parser = new ArgParser();
-       parser.arg("h", "help", "Show help");
-       parser.arg("v", "version", "Show Version");
-       parser.shortValueArg("o", "Specify the Output file. Extension is not needed");
-       parser.longMultiValueArg("src", "Specify the source file(s). One or multiple");
-
-       parser.parse(args);
-
-       if (parser.containsFlag("h") || parser.containsFlag("help"))
-           printHelp(parser);
-       if (parser.containsFlag("v") || parser.containsFlag("version"))
-           System.out.println("Darimc - Version 0.1.0");
+        parser.arg("h", "help", "Show help");
+        parser.arg("v", "version", "Show Version");
+        parser.shortValueArg("o", "Specify the Output file. Extension is not needed");
+        parser.longMultiValueArg("src", "Specify the source file(s). One or multiple");
+        parser.longValueArg("dump-bytecode", "Emit human readable text bytecode");
+        parser.longValueArg("dump-token", "Prints token stream and exit");
+        parser.longValueArg("dump-ast", "Prints AST and exit");
+        return parser;
     }
 }
