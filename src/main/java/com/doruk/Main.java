@@ -1,17 +1,32 @@
 package com.doruk;
 
+import com.doruk.argue.ArgParser;
+
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
-    static void main() {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        IO.println(String.format("Hello and welcome!"));
+    private static void printHelp(ArgParser parser) {
+        System.out.println("Darimc - Compiler Options");
+        System.out.println("Usage: darimc [options] [source files]");
+        System.out.println("Usage: darimc [options] [source files] [output file]");
+        System.out.println("Example: darimc --src hello.dm hi.dm file.dm -o program");
+        System.out.println("Example: darimc hello.dm -o program");
+        System.out.println("Example: darimc hello.dm");
+        System.out.print("Options:");
+        System.out.println(parser.getOptions());
+    }
+    public static void main(String[] args) {
+        var parser = new ArgParser();
+       parser.arg("h", "help", "Show help");
+       parser.arg("v", "version", "Show Version");
+       parser.shortValueArg("o", "Specify the Output file. Extension is not needed");
+       parser.longMultiValueArg("src", "Specify the source file(s). One or multiple");
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            IO.println("i = " + i);
-        }
+       parser.parse(args);
+
+       if (parser.containsFlag("h") || parser.containsFlag("help"))
+           printHelp(parser);
+       if (parser.containsFlag("v") || parser.containsFlag("version"))
+           System.out.println("Darimc - Version 0.1.0");
     }
 }
