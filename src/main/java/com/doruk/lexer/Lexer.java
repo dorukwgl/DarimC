@@ -2,6 +2,8 @@ package com.doruk.lexer;
 
 import com.doruk.lexer.dto.Pos;
 import com.doruk.lexer.dto.Token;
+import com.doruk.lexer.exceptions.InvalidEscape;
+import com.doruk.lexer.exceptions.UnterminatedString;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -70,6 +72,16 @@ public class Lexer {
             consume();
     }
 
+    private char getEscapedChar(char escaped) {
+        return switch (escaped) {
+            case 'n' -> '\n';
+            case 't' -> '\t';
+            case '"' -> '\"';
+            case '\\' -> '\\';
+            default -> '\0';
+        };
+    }
+
     private void createToken(TokenType type) {
         var lexeme = String.valueOf(consume());
         tokens.add(new Token(type, lexeme, null,
@@ -84,19 +96,46 @@ public class Lexer {
         return null;
     }
 
-    private String scanString(char c) {
-        return null;
+    private String[] scanString(char c) {
+        var lexeme = new StringBuilder();
+        var literal = new StringBuilder();
+        lexeme.append(c);
+
+        var last = c;
+        while (cursor < source.length()) {
+            // check escape
+            if (view() == '\\') {
+                var e = getEscapedChar(viewNext());
+                if (e == '\0')
+                    throw new InvalidEscape(viewNext(), new Pos(line + 1, column + 1));
+
+                lexeme.append((last = consume()));
+                lexeme.append((last = consume()));
+                literal.append(e);
+                continue;
+            }
+
+            last = consume();
+            lexeme.append(last);
+
+            if (last == '"')
+                break;
+            literal.append(last);
+        }
+
+        if (last != '"')
+            throw new UnterminatedString(new Pos(line + 1, column + 1), lexeme.toString());
+
+        return new String[]{lexeme.toString(), literal.toString()};
     }
 
     // when the single char doesn't match is expected in switch
     private void tokenizeDefault(char c) {
         if (c == '"') {
             var str = scanString(c);
-        }
-        else if (isDigit(c)) {
+        } else if (isDigit(c)) {
             BigDecimal nm = scanNumber(c);
-        }
-        else if (c == '_' || isAlpha(c)) {
+        } else if (c == '_' || isAlpha(c)) {
             var id = scanIdentifier(c);
             // check if identifier is keyword
         }
@@ -108,29 +147,52 @@ public class Lexer {
             char c = this.consume();
 
             switch (c) {
-                case '+' -> {}
-                case '-' -> {}
-                case '*' -> {}
-                case '/' -> {}
-                case '%' -> {}
-                case '^' -> {}
-                case '<' -> {}
-                case '>' -> {}
-                case '=' -> {}
-                case '!' -> {}
-                case '&' -> {}
-                case '|' -> {}
-                case ',' -> {}
-                case '.' -> {}
-                case ':' -> {}
-                case '#' -> {}
-                case '(' -> {}
-                case ')' -> {}
-                case '{' -> {}
-                case '}' -> {}
-                case '[' -> {}
-                case ']' -> {}
-                case '\\' -> {}
+                case '+' -> {
+                }
+                case '-' -> {
+                }
+                case '*' -> {
+                }
+                case '/' -> {
+                }
+                case '%' -> {
+                }
+                case '^' -> {
+                }
+                case '<' -> {
+                }
+                case '>' -> {
+                }
+                case '=' -> {
+                }
+                case '!' -> {
+                }
+                case '&' -> {
+                }
+                case '|' -> {
+                }
+                case ',' -> {
+                }
+                case '.' -> {
+                }
+                case ':' -> {
+                }
+                case '#' -> {
+                }
+                case '(' -> {
+                }
+                case ')' -> {
+                }
+                case '{' -> {
+                }
+                case '}' -> {
+                }
+                case '[' -> {
+                }
+                case ']' -> {
+                }
+                case '\\' -> {
+                }
                 case '\n', '\t', ' ' -> consume();
                 default -> {
 

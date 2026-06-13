@@ -10,6 +10,6 @@ public record Pos(
      */
     @Override
     public String toString() {
-        return "(" + line + "," + column + ")";
+        return "Pos(" + line + "," + column + ")";
     }
 }
