@@ -8,4 +8,13 @@ public record Token(
         Object literal,
         Pos pos
 ) {
+    @Override
+    public String toString() {
+        return "Token(" +
+                "type=" + type +
+                ", lexeme='" + lexeme + '\'' +
+                ", literal=" + literal +
+                ", pos=" + pos +
+                ")";
+    }
 }

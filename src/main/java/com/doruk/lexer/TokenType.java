@@ -16,10 +16,14 @@ public enum TokenType {
     ANY,
 
     // DECLARATION KEYWORDS
-    FUN,
     VAR,
     FINAL,
     NEW,
+
+    // IMPORT & CASTING
+    IMPORT,
+    EXPORT,
+    AS,
 
 
     // CONTROL FLOW KEYWORDS
@@ -28,7 +32,6 @@ public enum TokenType {
     FOR,
     WHILE,
     RETURN,
-    CONTINUE,
     BREAK,
 
     // BOOLEAN
@@ -79,9 +82,11 @@ public enum TokenType {
 
     // SEPARATORS
     COMMA,
-    SEMICOLON,
     COLON,
     DOT,
+    COMMENT,
+
+    ESCAPE,
 
     // SPECIAL
     EOF,

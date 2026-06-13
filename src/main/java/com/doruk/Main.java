@@ -9,7 +9,7 @@ public class Main {
         System.out.println("Darimc - Compiler Options");
         System.out.println("Usage: darimc [options] [source files]");
         System.out.println("Usage: darimc [options] [source files] [output file]");
-        System.out.println("Example: darimc --src hello.dm hi.dm file.dm -o program");
+        System.out.println("Example: darimc hello.dm hi.dm file.dm -o program");
         System.out.println("Example: darimc hello.dm -o program");
         System.out.println("Example: darimc hello.dm");
         System.out.print("Options:");
@@ -17,6 +17,12 @@ public class Main {
     }
 
     static void main(String[] args) {
+        // register global error handler
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            System.err.println("Uncaught exception: " + e.getMessage());
+            System.exit(1);
+        });
+
         var parser = createCliOptionParser();
         parser.parse(args);
 
@@ -37,7 +43,6 @@ public class Main {
         parser.arg("h", "help", "Show help");
         parser.arg("v", "version", "Show Version");
         parser.shortValueArg("o", "Specify the Output file. Extension is not needed");
-        parser.longMultiValueArg("src", "Specify the source file(s). One or multiple");
         parser.longValueArg("dump-bytecode", "Emit human readable text bytecode");
         parser.longValueArg("dump-token", "Prints token stream and exit");
         parser.longValueArg("dump-ast", "Prints AST and exit");
