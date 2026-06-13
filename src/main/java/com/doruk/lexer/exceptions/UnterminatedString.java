@@ -2,7 +2,7 @@ package com.doruk.lexer.exceptions;
 
 import com.doruk.lexer.dto.Pos;
 
-public class UnterminatedString extends RuntimeException {
+public class UnterminatedString extends LexerException {
     public UnterminatedString(Pos pos, String lexeme) {
         super("Unterminated String Literal, expected \" got EOF. on line:" +
                 pos.line() +
