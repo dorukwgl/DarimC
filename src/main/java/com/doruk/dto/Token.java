@@ -1,4 +1,4 @@
-package com.doruk.lexer.dto;
+package com.doruk.dto;
 
 import com.doruk.lexer.TokenType;
 

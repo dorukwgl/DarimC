@@ -2,7 +2,7 @@ package com.doruk;
 
 import com.doruk.argue.ArgParser;
 import com.doruk.lexer.Lexer;
-import com.doruk.lexer.dto.Token;
+import com.doruk.dto.Token;
 import com.doruk.lexer.exceptions.LexerException;
 
 import java.io.BufferedWriter;
@@ -78,7 +78,7 @@ public class Compiler {
 
             if (source.isBlank())
                 return;
-            accumulation.add(new Lexer(source).tokens());
+            accumulation.add(new Lexer(file, source).tokens());
         }
     }
 }

@@ -1,12 +1,14 @@
 package com.doruk.lexer.exceptions;
 
-import com.doruk.lexer.dto.Pos;
+import com.doruk.dto.Pos;
 
 public class UnterminatedString extends LexerException {
     public UnterminatedString(Pos pos, String lexeme) {
-        super("Unterminated String Literal, expected \" got EOF. on line:" +
+        super("Unterminated String Literal, expected \" got EOF. on " +
+                pos.file() +
+                ":" +
                 pos.line() +
-                " column:" + pos.column() +
+                ":" + pos.column() +
                 " span: " + lexeme.length()
         );
     }

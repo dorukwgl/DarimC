@@ -1,6 +1,7 @@
-package com.doruk.lexer.dto;
+package com.doruk.dto;
 
 public record Pos(
+        String file,
         int line,
         int column
 ) {
@@ -10,6 +11,6 @@ public record Pos(
      */
     @Override
     public String toString() {
-        return "Pos(" + line + "," + column + ")";
+        return "Pos(" + file + "," + line + "," + column + ")";
     }
 }

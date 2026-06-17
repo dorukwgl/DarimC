@@ -22,7 +22,7 @@ public enum TokenType {
 
     // IMPORT & CASTING
     IMPORT,
-    EXPORT,
+    VISIBLE,
     AS,
 
 
@@ -89,6 +89,9 @@ public enum TokenType {
     COMMENT,
 
     ESCAPE,
+
+    RANGE, // ..
+    IN,
 
     // SPECIAL
     EOF,

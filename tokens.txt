@@ -1,0 +1,9 @@
+Token(type=VAR, lexeme='var', literal=null, pos=Pos(1,1))
+Token(type=IDENTIFIER, lexeme='x', literal=null, pos=Pos(1,5))
+Token(type=EQUAL, lexeme='=', literal=null, pos=Pos(1,7))
+Token(type=NUMBER_LITERAL, lexeme='5', literal=5, pos=Pos(1,9))
+Token(type=PLUS, lexeme='+', literal=null, pos=Pos(1,11))
+Token(type=EOF, lexeme='', literal=null, pos=Pos(1,11))
+
+
+

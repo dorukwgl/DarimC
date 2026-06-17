@@ -1,12 +1,13 @@
 package com.doruk.lexer.exceptions;
 
-import com.doruk.lexer.dto.Pos;
+import com.doruk.dto.Pos;
 
 public class InvalidTokenException extends LexerException {
     public InvalidTokenException(String lexeme, Pos pos) {
         super("Illegal token:" + lexeme +
-                " on line:" + pos.line() +
-                " column:" + pos.column() +
+                " on " + pos.file() +
+                ":" + pos.line() +
+                ":" + pos.column() +
                 " span: " + lexeme.length()
         );
     }

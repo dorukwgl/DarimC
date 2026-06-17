@@ -20,6 +20,7 @@ public class Main {
         // register global error handler
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
             System.out.println("Uncaught exception: " + e.getMessage());
+            e.printStackTrace();
             System.exit(1);
         });
 

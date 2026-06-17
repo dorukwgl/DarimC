@@ -1,7 +1,7 @@
 package com.doruk.lexer;
 
-import com.doruk.lexer.dto.Pos;
-import com.doruk.lexer.dto.Token;
+import com.doruk.dto.Pos;
+import com.doruk.dto.Token;
 import com.doruk.lexer.exceptions.InvalidEscape;
 import com.doruk.lexer.exceptions.InvalidTokenException;
 import com.doruk.lexer.exceptions.UnterminatedString;
@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 public class Lexer {
+    private final String fileName;
     private final String source;
     private final List<Token> tokens;
     private int line = 0;
@@ -19,11 +20,12 @@ public class Lexer {
     private final Map<String, TokenType> tokenMap;
     private final Set<Character> validNumTrailingTokens =
             new HashSet<>(Set.of(
-                    ' ', '\t', '\n', ')', ']', '}', '+', '-', '*', '/', '%', '=', '!', '<', '>', '&', '|', '#', ','
+                    ' ', '\t', '\n', ')', ']', '}', '+', '-', '*', '/', '%', '=', '!', '<', '>', '&', '|', '#', ',', ':', '^'
             ));
 
-    public Lexer(String source) {
+    public Lexer(String fileName, String source) {
         this.source = source;
+        this.fileName = fileName;
 
         this.tokenMap = new HashMap<>();
         this.tokens = new ArrayList<>();
@@ -33,10 +35,9 @@ public class Lexer {
 
         // tokenize
         tokenize();
-
         // append eof token
         tokens.add(new Token(TokenType.EOF, "", null,
-                new Pos(line + 1, column)));
+                new Pos(fileName, line + 1, column)));
     }
 
     private char view() {
@@ -75,7 +76,7 @@ public class Lexer {
     }
 
     private void skipComment() {
-        while (view() != '\n' && cursor < source.length())
+        while (cursor < source.length() && view() != '\n')
             consume();
     }
 
@@ -90,7 +91,7 @@ public class Lexer {
     }
 
     private Pos calculatePosition(String lexeme) {
-        return new Pos(line + 1, column - (lexeme.length() - 1));
+        return new Pos(fileName, line + 1, column - (lexeme.length() - 1));
     }
 
     private void addToken(TokenType type, String lexeme, Object literal) {
@@ -119,7 +120,7 @@ public class Lexer {
 
         while (cursor < source.length()) {
             char n = view();
-            if (validNumTrailingTokens.contains(n))
+            if (validNumTrailingTokens.contains(n) || (n == '.' && viewNext() == '.')) // if c = ., and next = ., then its range
                 break;
 
             builder.append(consume());
@@ -129,7 +130,12 @@ public class Lexer {
         }
 
         var lexeme = builder.toString();
-        addToken(TokenType.NUMBER_LITERAL, lexeme, new BigDecimal(lexeme));
+        try {
+            var num = new BigDecimal(lexeme);
+            addToken(TokenType.NUMBER_LITERAL, lexeme, num);
+        } catch (NumberFormatException e) {
+            throw new InvalidTokenException(builder.toString(), calculatePosition(builder.toString()));
+        }
     }
 
     private void scanString(char c) {
@@ -141,6 +147,10 @@ public class Lexer {
         while (cursor < source.length()) {
             // check escape
             if (view() == '\\') {
+                // check if eof
+                if ((cursor + 1) >= source.length())
+                    throw new InvalidEscape('\0', calculatePosition("\0"));
+
                 var e = getEscapedChar(viewNext());
                 if (e == '\0')
                     throw new InvalidEscape(viewNext(), calculatePosition(String.valueOf(viewNext())));
@@ -167,7 +177,7 @@ public class Lexer {
 
     private void scanOperator(char c) {
         // since c is already consumed, view should point to next char
-        var next = view();
+        var next = cursor >= source.length() ? '\0' : view();
         switch (c) {
             case '+' -> {
                 if (next == '+')
@@ -249,14 +259,14 @@ public class Lexer {
                     addToken(TokenType.AND, "&&", null);
                     consume();
                 }
-                else throw new InvalidTokenException("&", new Pos(line + 1, column));
+                else throw new InvalidTokenException("&", new Pos(fileName, line + 1, column));
             }
             case '|' -> {
                 if (next == '|') {
                     addToken(TokenType.OR, "||", null);
                     consume();
                 }
-                else  throw new InvalidTokenException("|", new Pos(line + 1, column));
+                else  throw new InvalidTokenException("|", new Pos(fileName, line + 1, column));
             }
             case '!' -> {
                 if (next == '=') {
@@ -264,6 +274,13 @@ public class Lexer {
                     consume();
                 }
                 else addToken(TokenType.NOT, "!", null);
+            }
+            case '.' -> {
+                if (next == '.') {
+                    addToken(TokenType.RANGE, "..", null);
+                    consume();
+                }
+                else addToken(TokenType.DOT, ".", null);
             }
         }
     }
@@ -281,7 +298,7 @@ public class Lexer {
             addToken(tokenType, id, null);
         }
         // throw invalid token at position
-        else throw new InvalidTokenException(String.valueOf(c), new Pos(line + 1, column));
+        else throw new InvalidTokenException(String.valueOf(c), new Pos(fileName, line + 1, column));
     }
 
     private void tokenize() {
@@ -289,9 +306,8 @@ public class Lexer {
             char c = this.consume();
 
             switch (c) {
-                case '+', '<', '>', '=', '&', '|', '!', '%', '^', '-', '*', '/' -> scanOperator(c);
+                case '+', '<', '>', '=', '&', '|', '!', '%', '^', '-', '*', '/', '.' -> scanOperator(c);
                 case ',' -> addToken(TokenType.COMMA, ",", null);
-                case '.' -> addToken(TokenType.DOT, ".", null);
                 case ':' -> addToken(TokenType.COLON, ":", null);
                 case '#' -> skipComment();
                 case '(' -> addToken(TokenType.LEFT_PAREN, "(", null);
