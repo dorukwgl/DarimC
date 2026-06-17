@@ -45,7 +45,7 @@ public enum TokenType {
     SLASH,
     SLASH_SLASH,
     MODULO,
-    POW,
+    CARET,
 
     // COMPARISON OPERATORS
     GREATER,
@@ -61,6 +61,8 @@ public enum TokenType {
     MINUS_EQUAL,
     STAR_EQUAL,
     SLASH_EQUAL,
+    CARET_EQUAL,
+    MODULO_EQUAL,
     EQUAL,
 
     // LOGICAL OPERATORS

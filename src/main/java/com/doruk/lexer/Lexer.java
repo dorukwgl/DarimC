@@ -3,6 +3,7 @@ package com.doruk.lexer;
 import com.doruk.lexer.dto.Pos;
 import com.doruk.lexer.dto.Token;
 import com.doruk.lexer.exceptions.InvalidEscape;
+import com.doruk.lexer.exceptions.InvalidTokenException;
 import com.doruk.lexer.exceptions.UnterminatedString;
 
 import java.math.BigDecimal;
@@ -67,6 +68,10 @@ public class Lexer {
         return (c >= '0' && c <= '9');
     }
 
+    private boolean isWhitespace(char c) {
+        return c == ' ' || c == '\t' || c == '\n';
+    }
+
     private void skipComment() {
         while (view() != '\n' && cursor < source.length())
             consume();
@@ -82,21 +87,46 @@ public class Lexer {
         };
     }
 
-    private void createToken(TokenType type) {
-        var lexeme = String.valueOf(consume());
-        tokens.add(new Token(type, lexeme, null,
-                new Pos(line + 1, column + 1)));
+    private void addToken(TokenType type, String lexeme, Object literal) {
+        tokens.add(
+                new Token(type, lexeme, literal, new Pos(line + 1, column + 1))
+        );
     }
 
     private String scanIdentifier(char c) {
-        return null;
+        var id = new StringBuilder();
+        id.append(c);
+
+        while (cursor < source.length()) {
+            char i = view();
+            if (isWhitespace(c) || !isValidIdentifier(i))
+                break;
+
+            id.append(consume());
+        }
+        return id.toString();
     }
 
-    private BigDecimal scanNumber(char c) {
-        return null;
+    private void scanNumber(char c) {
+        var builder = new StringBuilder();
+        builder.append(c);
+
+        while (cursor < source.length()) {
+            char n = view();
+            if (isWhitespace(n))
+                break;
+
+            if (!(isDigit(n) || n == '.'))
+                throw new InvalidTokenException(builder.toString(), new Pos(line + 1, column));
+
+            builder.append(consume());
+        }
+
+        var lexeme = builder.toString();
+        addToken(TokenType.NUMBER_LITERAL, lexeme, new BigDecimal(lexeme));
     }
 
-    private String[] scanString(char c) {
+    private void scanString(char c) {
         var lexeme = new StringBuilder();
         var literal = new StringBuilder();
         lexeme.append(c);
@@ -109,7 +139,7 @@ public class Lexer {
                 if (e == '\0')
                     throw new InvalidEscape(viewNext(), new Pos(line + 1, column + 1));
 
-                lexeme.append((last = consume()));
+                lexeme.append(consume());
                 lexeme.append((last = consume()));
                 literal.append(e);
                 continue;
@@ -126,20 +156,126 @@ public class Lexer {
         if (last != '"')
             throw new UnterminatedString(new Pos(line + 1, column + 1), lexeme.toString());
 
-        return new String[]{lexeme.toString(), literal.toString()};
+        addToken(TokenType.STRING, lexeme.toString(), literal.toString());
+    }
+
+    private void scanOperator(char c) {
+        // since c is already consumed, view should point to next char
+        var next = view();
+        switch (c) {
+            case '+' -> {
+                if (next == '+')
+                    addToken(TokenType.PLUS_PLUS, "++", null);
+                else if (next == '=')
+                    addToken(TokenType.PLUS_EQUAL, "+=", null);
+                else {
+                    addToken(TokenType.PLUS, "+", null);
+                    return; // don't consume
+                }
+                consume();
+            }
+            case '-' -> {
+                if (next == '-')
+                    addToken(TokenType.MINUS_MINUS, "--", null);
+                else if (next == '=')
+                    addToken(TokenType.MINUS_EQUAL, "-=", null);
+                else {
+                    addToken(TokenType.MINUS, "-", null);
+                    return; // don't consume
+                }
+                consume();
+            }
+            case '*' -> {
+                if (next == '=') {
+                    addToken(TokenType.STAR_EQUAL, "*=", null);
+                    consume();
+                }
+                else addToken(TokenType.STAR, "*", null);
+            }
+            case '/' -> {
+                if (next == '/')
+                    addToken(TokenType.SLASH_SLASH, "//", null);
+                else if (next == '=')
+                    addToken(TokenType.SLASH_EQUAL, "/=", null);
+                else {
+                    addToken(TokenType.SLASH, "/", null);
+                    return; // don't consume
+                }
+                consume();
+            }
+            case '%' -> {
+                if (next == '=') {
+                    addToken(TokenType.MODULO_EQUAL, "%=", null);
+                    consume();
+                }
+                else addToken(TokenType.MODULO, "%", null);
+            }
+            case '^' -> {
+                if (next == '=') {
+                    addToken(TokenType.CARET_EQUAL, "^=", null);
+                    consume();
+                }
+                else addToken(TokenType.CARET, "^", null);
+            }
+            case '<' -> {
+                if (next == '=') {
+                    addToken(TokenType.LESS_EQUAL, "<=", null);
+                    consume();
+                }
+                else addToken(TokenType.LESS, "<", null);
+            }
+            case '>' -> {
+                if (next == '=') {
+                    addToken(TokenType.GREATER_EQUAL, ">=", null);
+                    consume();
+                }
+                else addToken(TokenType.GREATER, ">", null);
+            }
+            case '=' -> {
+                if (next == '=') {
+                    addToken(TokenType.EQUAL_EQUAL, "==", null);
+                    consume();
+                }
+                else addToken(TokenType.EQUAL, "=", null);
+            }
+            case '&' -> {
+                if (next == '&') {
+                    addToken(TokenType.AND, "&&", null);
+                    consume();
+                }
+                else throw new InvalidTokenException("&", new Pos(line + 1, column + 1));
+            }
+            case '|' -> {
+                if (next == '|') {
+                    addToken(TokenType.OR, "||", null);
+                    consume();
+                }
+                else  throw new InvalidTokenException("|", new Pos(line + 1, column + 1));
+            }
+            case '!' -> {
+                if (next == '=') {
+                    addToken(TokenType.NOT_EQUAL, "!=", null);
+                    consume();
+                }
+                else addToken(TokenType.NOT, "!", null);
+            }
+        }
     }
 
     // when the single char doesn't match is expected in switch
     private void tokenizeDefault(char c) {
-        if (c == '"') {
-            var str = scanString(c);
-        } else if (isDigit(c)) {
-            BigDecimal nm = scanNumber(c);
-        } else if (c == '_' || isAlpha(c)) {
+        if (c == '"')
+            scanString(c);
+        else if (isDigit(c))
+            scanNumber(c);
+        else if (c == '_' || isAlpha(c)) {
             var id = scanIdentifier(c);
             // check if identifier is keyword
+            var tokenType = tokenMap.getOrDefault(id, TokenType.IDENTIFIER);
+            addToken(tokenType, id, null);
         }
         // throw invalid token at position
+        throw new InvalidTokenException(String.valueOf(c), new Pos(line + 1, column + 1));
     }
 
     private void tokenize() {
@@ -147,56 +283,19 @@ public class Lexer {
             char c = this.consume();
 
             switch (c) {
-                case '+' -> {
-                }
-                case '-' -> {
-                }
-                case '*' -> {
-                }
-                case '/' -> {
-                }
-                case '%' -> {
-                }
-                case '^' -> {
-                }
-                case '<' -> {
-                }
-                case '>' -> {
-                }
-                case '=' -> {
-                }
-                case '!' -> {
-                }
-                case '&' -> {
-                }
-                case '|' -> {
-                }
-                case ',' -> {
-                }
-                case '.' -> {
-                }
-                case ':' -> {
-                }
-                case '#' -> {
-                }
-                case '(' -> {
-                }
-                case ')' -> {
-                }
-                case '{' -> {
-                }
-                case '}' -> {
-                }
-                case '[' -> {
-                }
-                case ']' -> {
-                }
-                case '\\' -> {
-                }
+                case '+', '<', '>', '=', '&', '|', '!', '%', '^', '-', '*', '/' -> scanOperator(c);
+                case ',' -> addToken(TokenType.COMMA, scanIdentifier(c), null);
+                case '.' -> addToken(TokenType.DOT, scanIdentifier(c), null);
+                case ':' -> addToken(TokenType.COLON, scanIdentifier(c), null);
+                case '#' -> skipComment();
+                case '(' -> addToken(TokenType.LEFT_PAREN, scanIdentifier(c), null);
+                case ')' -> addToken(TokenType.RIGHT_PAREN, scanIdentifier(c), null);
+                case '{' -> addToken(TokenType.LEFT_BRACE, scanIdentifier(c), null);
+                case '}' -> addToken(TokenType.RIGHT_BRACE, scanIdentifier(c), null);
+                case '[' -> addToken(TokenType.LEFT_BRACKET, scanIdentifier(c), null);
+                case ']' -> addToken(TokenType.RIGHT_BRACKET, scanIdentifier(c), null);
                 case '\n', '\t', ' ' -> consume();
-                default -> {
-
-                }
+                default -> tokenizeDefault(c);
             }
         }
     }
