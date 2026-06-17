@@ -17,12 +17,12 @@ public class Compiler {
     private final ArgParser args;
     private final List<List<Token>> accumulation;
 
-    public  Compiler(ArgParser argParser) {
+    public Compiler(ArgParser argParser) {
         this.args = argParser;
         this.accumulation = new ArrayList<>();
 
         // check all files are source files
-        var invalid  = args.getDefaultArgs().stream()
+        var invalid = args.getDefaultArgs().stream()
                 .filter(f -> !f.endsWith(".dm"))
                 .map(f -> {
                     System.out.println("Not a source file: " + f);
@@ -51,15 +51,14 @@ public class Compiler {
 
     private void dumpTokens() {
         var out = args.getValue("o");
-        try {
-            new BufferedWriter(new FileWriter(out != null ? out : "tokens_dump.txt"))
-                    .write(
-                            accumulation.stream()
-                                    .map(f -> f.stream()
-                                            .map(Token::toString)
-                                            .reduce("", (a, b) -> a + "\n" + b))
-                                    .reduce("", (a, b) -> a + "\n\n\n" + b)
-                    );
+        try (var fl = new BufferedWriter(new FileWriter(out != null ? out : "tokens_dump.txt"))) {
+            fl.write(
+                    accumulation.stream()
+                            .map(f -> f.stream()
+                                    .map(Token::toString)
+                                    .reduce("", (a, b) -> a + b + "\n"))
+                            .reduce("", (a, b) -> a + b + "\n\n\n")
+            );
         } catch (IOException e) {
             System.out.println("Failed to write tokens to file: " + out + "\n Type: -h for help");
             System.exit(-1);

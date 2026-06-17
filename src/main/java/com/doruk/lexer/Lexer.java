@@ -17,6 +17,10 @@ public class Lexer {
     private int cursor = 0;
 
     private final Map<String, TokenType> tokenMap;
+    private final Set<Character> validNumTrailingTokens =
+            new HashSet<>(Set.of(
+                    ' ', '\t', '\n', ')', ']', '}', '+', '-', '*', '/', '%', '=', '!', '<', '>', '&', '|', '#', ','
+            ));
 
     public Lexer(String source) {
         this.source = source;
@@ -115,7 +119,7 @@ public class Lexer {
 
         while (cursor < source.length()) {
             char n = view();
-            if (isWhitespace(n))
+            if (validNumTrailingTokens.contains(n))
                 break;
 
             builder.append(consume());
@@ -158,7 +162,7 @@ public class Lexer {
         if (last != '"')
             throw new UnterminatedString(calculatePosition(lexeme.toString()), lexeme.toString());
 
-        addToken(TokenType.STRING, lexeme.toString(), literal.toString());
+        addToken(TokenType.STRING_LITERAL, lexeme.toString(), literal.toString());
     }
 
     private void scanOperator(char c) {
@@ -286,16 +290,16 @@ public class Lexer {
 
             switch (c) {
                 case '+', '<', '>', '=', '&', '|', '!', '%', '^', '-', '*', '/' -> scanOperator(c);
-                case ',' -> addToken(TokenType.COMMA, scanIdentifier(c), null);
-                case '.' -> addToken(TokenType.DOT, scanIdentifier(c), null);
-                case ':' -> addToken(TokenType.COLON, scanIdentifier(c), null);
+                case ',' -> addToken(TokenType.COMMA, ",", null);
+                case '.' -> addToken(TokenType.DOT, ".", null);
+                case ':' -> addToken(TokenType.COLON, ":", null);
                 case '#' -> skipComment();
-                case '(' -> addToken(TokenType.LEFT_PAREN, scanIdentifier(c), null);
-                case ')' -> addToken(TokenType.RIGHT_PAREN, scanIdentifier(c), null);
-                case '{' -> addToken(TokenType.LEFT_BRACE, scanIdentifier(c), null);
-                case '}' -> addToken(TokenType.RIGHT_BRACE, scanIdentifier(c), null);
-                case '[' -> addToken(TokenType.LEFT_BRACKET, scanIdentifier(c), null);
-                case ']' -> addToken(TokenType.RIGHT_BRACKET, scanIdentifier(c), null);
+                case '(' -> addToken(TokenType.LEFT_PAREN, "(", null);
+                case ')' -> addToken(TokenType.RIGHT_PAREN, ")", null);
+                case '{' -> addToken(TokenType.LEFT_BRACE, "{", null);
+                case '}' -> addToken(TokenType.RIGHT_BRACE, "}", null);
+                case '[' -> addToken(TokenType.LEFT_BRACKET, "[", null);
+                case ']' -> addToken(TokenType.RIGHT_BRACKET, "]", null);
                 case '\n', '\t', ' ' -> {}
                 default -> tokenizeDefault(c);
             }
