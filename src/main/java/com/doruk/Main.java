@@ -19,7 +19,7 @@ public class Main {
     static void main(String[] args) {
         // register global error handler
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
-            System.err.println("Uncaught exception: " + e.getMessage());
+            System.out.println("Uncaught exception: " + e.getMessage());
             System.exit(1);
         });
 
@@ -44,7 +44,7 @@ public class Main {
         parser.arg("v", "version", "Show Version");
         parser.shortValueArg("o", "Specify the Output file. Extension is not needed");
         parser.longValueArg("dump-bytecode", "Emit human readable text bytecode");
-        parser.longValueArg("dump-token", "Prints token stream and exit");
+        parser.longArg("dump-token", "Prints token stream and exit");
         parser.longValueArg("dump-ast", "Prints AST and exit");
         return parser;
     }

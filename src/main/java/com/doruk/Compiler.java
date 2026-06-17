@@ -12,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Compiler {
     private final ArgParser args;
@@ -62,7 +61,8 @@ public class Compiler {
                                     .reduce("", (a, b) -> a + "\n\n\n" + b)
                     );
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("Failed to write tokens to file: " + out + "\n Type: -h for help");
+            System.exit(-1);
         }
     }
 
@@ -73,7 +73,8 @@ public class Compiler {
             try {
                 source = Files.readString(Paths.get(file));
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                System.out.println("Failed to read file: " + file + "\nType: -h for help");
+                System.exit(-1);
             }
 
             if (source.isBlank())

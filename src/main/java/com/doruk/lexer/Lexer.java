@@ -7,24 +7,22 @@ import com.doruk.lexer.exceptions.InvalidTokenException;
 import com.doruk.lexer.exceptions.UnterminatedString;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Lexer {
-    private String source;
-    private List<Token> tokens;
+    private final String source;
+    private final List<Token> tokens;
     private int line = 0;
     private int column = 0;
     private int cursor = 0;
 
-    private Map<String, TokenType> tokenMap;
+    private final Map<String, TokenType> tokenMap;
 
     public Lexer(String source) {
         this.source = source;
 
         this.tokenMap = new HashMap<>();
+        this.tokens = new ArrayList<>();
         // fill the token map
         Arrays.stream(TokenType.values())
                 .forEach(tokenType -> tokenMap.put(tokenType.name().toLowerCase(), tokenType));
@@ -87,9 +85,13 @@ public class Lexer {
         };
     }
 
+    private Pos calculatePosition(String lexeme) {
+        return new Pos(line + 1, column - (lexeme.length() - 1));
+    }
+
     private void addToken(TokenType type, String lexeme, Object literal) {
         tokens.add(
-                new Token(type, lexeme, literal, new Pos(line + 1, column + 1))
+                new Token(type, lexeme, literal, calculatePosition(lexeme))
         );
     }
 
@@ -116,10 +118,10 @@ public class Lexer {
             if (isWhitespace(n))
                 break;
 
-            if (!(isDigit(n) || n == '.'))
-                throw new InvalidTokenException(builder.toString(), new Pos(line + 1, column));
-
             builder.append(consume());
+
+            if (!(isDigit(n) || n == '.'))
+                throw new InvalidTokenException(builder.toString(), calculatePosition(builder.toString()));
         }
 
         var lexeme = builder.toString();
@@ -137,7 +139,7 @@ public class Lexer {
             if (view() == '\\') {
                 var e = getEscapedChar(viewNext());
                 if (e == '\0')
-                    throw new InvalidEscape(viewNext(), new Pos(line + 1, column + 1));
+                    throw new InvalidEscape(viewNext(), calculatePosition(String.valueOf(viewNext())));
 
                 lexeme.append(consume());
                 lexeme.append((last = consume()));
@@ -154,7 +156,7 @@ public class Lexer {
         }
 
         if (last != '"')
-            throw new UnterminatedString(new Pos(line + 1, column + 1), lexeme.toString());
+            throw new UnterminatedString(calculatePosition(lexeme.toString()), lexeme.toString());
 
         addToken(TokenType.STRING, lexeme.toString(), literal.toString());
     }
@@ -243,14 +245,14 @@ public class Lexer {
                     addToken(TokenType.AND, "&&", null);
                     consume();
                 }
-                else throw new InvalidTokenException("&", new Pos(line + 1, column + 1));
+                else throw new InvalidTokenException("&", new Pos(line + 1, column));
             }
             case '|' -> {
                 if (next == '|') {
                     addToken(TokenType.OR, "||", null);
                     consume();
                 }
-                else  throw new InvalidTokenException("|", new Pos(line + 1, column + 1));
+                else  throw new InvalidTokenException("|", new Pos(line + 1, column));
             }
             case '!' -> {
                 if (next == '=') {
@@ -275,7 +277,7 @@ public class Lexer {
             addToken(tokenType, id, null);
         }
         // throw invalid token at position
-        throw new InvalidTokenException(String.valueOf(c), new Pos(line + 1, column + 1));
+        else throw new InvalidTokenException(String.valueOf(c), new Pos(line + 1, column));
     }
 
     private void tokenize() {
@@ -294,7 +296,7 @@ public class Lexer {
                 case '}' -> addToken(TokenType.RIGHT_BRACE, scanIdentifier(c), null);
                 case '[' -> addToken(TokenType.LEFT_BRACKET, scanIdentifier(c), null);
                 case ']' -> addToken(TokenType.RIGHT_BRACKET, scanIdentifier(c), null);
-                case '\n', '\t', ' ' -> consume();
+                case '\n', '\t', ' ' -> {}
                 default -> tokenizeDefault(c);
             }
         }
