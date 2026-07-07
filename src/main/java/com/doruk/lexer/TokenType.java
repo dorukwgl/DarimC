@@ -87,6 +87,7 @@ public enum TokenType {
     COLON,
     DOT,
     COMMENT,
+    SEMICOLON,
 
     ESCAPE,
 

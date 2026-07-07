@@ -20,6 +20,10 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+configure<JavaPluginExtension> {
+    modularity.inferModulePath.set(true)
+}
+
 tasks.named<JavaExec>("run") {
     jvmArgs(
         // Disable NioIoHandler selector instrumentation (fails on Java 26)

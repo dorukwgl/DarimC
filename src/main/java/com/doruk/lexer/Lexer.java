@@ -316,6 +316,7 @@ public class Lexer {
                 case '}' -> addToken(TokenType.RIGHT_BRACE, "}", null);
                 case '[' -> addToken(TokenType.LEFT_BRACKET, "[", null);
                 case ']' -> addToken(TokenType.RIGHT_BRACKET, "]", null);
+                case ';' -> addToken(TokenType.SEMICOLON, ";", null);
                 case '\n', '\t', ' ' -> {}
                 default -> tokenizeDefault(c);
             }
