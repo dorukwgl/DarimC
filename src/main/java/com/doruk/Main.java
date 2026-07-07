@@ -43,6 +43,7 @@ public class Main {
         var parser = new ArgParser();
         parser.arg("h", "help", "Show help");
         parser.arg("v", "version", "Show Version");
+        parser.longArg("lint", "check source files for errors");
         parser.shortValueArg("o", "Specify the Output file. Extension is not needed");
         parser.longValueArg("dump-bytecode", "Emit human readable text bytecode");
         parser.longArg("dump-token", "Prints token stream and exit");

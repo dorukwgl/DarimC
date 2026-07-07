@@ -1,9 +1,17 @@
-Token(type=VAR, lexeme='var', literal=null, pos=Pos(1,1))
-Token(type=IDENTIFIER, lexeme='x', literal=null, pos=Pos(1,5))
-Token(type=EQUAL, lexeme='=', literal=null, pos=Pos(1,7))
-Token(type=NUMBER_LITERAL, lexeme='5', literal=5, pos=Pos(1,9))
-Token(type=PLUS, lexeme='+', literal=null, pos=Pos(1,11))
-Token(type=EOF, lexeme='', literal=null, pos=Pos(1,11))
+Token(type=VAR, lexeme='var', literal=null, pos=Pos(/home/doruk/Desktop/test.dm,1,1))
+Token(type=IDENTIFIER, lexeme='x', literal=null, pos=Pos(/home/doruk/Desktop/test.dm,1,5))
+Token(type=COLON, lexeme=':', literal=null, pos=Pos(/home/doruk/Desktop/test.dm,1,6))
+Token(type=STRING, lexeme='string', literal=null, pos=Pos(/home/doruk/Desktop/test.dm,1,8))
+Token(type=EQUAL, lexeme='=', literal=null, pos=Pos(/home/doruk/Desktop/test.dm,1,15))
+Token(type=STRING_LITERAL, lexeme='"hello \n world"', literal=hello 
+ world, pos=Pos(/home/doruk/Desktop/test.dm,1,17))
+Token(type=VAR, lexeme='var', literal=null, pos=Pos(/home/doruk/Desktop/test.dm,2,1))
+Token(type=IDENTIFIER, lexeme='y', literal=null, pos=Pos(/home/doruk/Desktop/test.dm,2,5))
+Token(type=COLON, lexeme=':', literal=null, pos=Pos(/home/doruk/Desktop/test.dm,2,6))
+Token(type=STRING, lexeme='string', literal=null, pos=Pos(/home/doruk/Desktop/test.dm,2,8))
+Token(type=EQUAL, lexeme='=', literal=null, pos=Pos(/home/doruk/Desktop/test.dm,2,15))
+Token(type=STRING_LITERAL, lexeme='"it's \\ backslash"', literal=it's \ backslash, pos=Pos(/home/doruk/Desktop/test.dm,2,17))
+Token(type=EOF, lexeme='', literal=null, pos=Pos(/home/doruk/Desktop/test.dm,3,0))
 
 
 

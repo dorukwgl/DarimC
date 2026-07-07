@@ -42,6 +42,11 @@ public class Compiler {
                 dumpTokens();
                 return;
             }
+            // check if only lint flag is present
+            if (args.containsFlag("lint")) {
+//                lint();
+                return;
+            }
         } catch (LexerException e) {
             System.out.println(e.getMessage());
             System.exit(-1);

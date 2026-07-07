@@ -11,7 +11,7 @@ public enum TokenType {
     // TYPE KEYWORDS
     NUM,
     STRING,
-    BOOL,
+    BOOLEAN,
     VOID,
     ANY,
 
