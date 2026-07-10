@@ -30,6 +30,8 @@ public enum TokenType {
     // CONTROL FLOW KEYWORDS
     IF,
     ELSE,
+    MATCH,
+    TERNARY,
     FOR,
     WHILE,
     RETURN,

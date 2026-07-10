@@ -12,7 +12,6 @@ public sealed interface Stmt extends AstNode permits
         IfStmt,
         ImportStmt,
         ReturnStmt,
-        SwitchStmt,
         VariableDeclStmt,
         WhileStmt
 {

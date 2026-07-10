@@ -1,4 +1,5 @@
 module com.doruk {
+    requires jdk.jshell;
     exports com.doruk;
     exports com.doruk.lexer;
     exports com.doruk.parser.nodes;
