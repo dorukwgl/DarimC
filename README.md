@@ -450,9 +450,9 @@ var size = length(nums)
 Tuples are **ordered, heterogeneous, immutable** collections.
 
 ```darim
-var point = (10, 20)
-var record = (42, "Alice", true)
-var empty = ()
+var point = Tuple(10, 20)
+var record = Tuple(42, "Alice", true)
+var empty = Tuple()
 ```
 
 - Defined with `()` syntax
@@ -461,7 +461,7 @@ var empty = ()
 - Stack-allocated by default; use `new` for heap allocation
 
 ```darim
-var t = (1, "hello", 3.14)
+var t = Tuple(1, "hello", 3.14)
 
 var n: num = t[0]       // 1
 var s: string = t[1]    // "hello"
@@ -471,14 +471,14 @@ var f: num = t[2]       // 3.14
 **Heap Tuples (returnable from functions):**
 
 ```darim
-var t = new (1, "hello")   // heap-allocated, safe to return
+var t = new Tuple(1, "hello")   // heap-allocated, safe to return
 ```
 
 **Multi-return (Tuples as Return Vehicles):**
 
 See [Functions → Multi-return](#multi-value-return) for how tuples integrate with function return values.
 
-> **🔮 Future Enhancement:** Named tuples (`var t = (x:1, y:2)`) with field access by name.
+> **🔮 Future Enhancement:** Named tuples (`var t = Tuple(x:1, y:2)`) with field access by name.
 
 ---
 

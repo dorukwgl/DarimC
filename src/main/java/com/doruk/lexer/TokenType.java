@@ -14,6 +14,7 @@ public enum TokenType {
     BOOLEAN,
     VOID,
     ANY,
+    FUNC,
 
     // DECLARATION KEYWORDS
     VAR,
@@ -54,6 +55,7 @@ public enum TokenType {
     LESS_EQUAL,
     EQUAL_EQUAL,
     NOT_EQUAL,
+    BET,
 
 
     // ASSIGNMENT OPERATORS
