@@ -34,7 +34,7 @@ Token(type=VAR, lexeme='var', literal=null, pos=Pos(guest_program/01_hello_world
 Token(type=IDENTIFIER, lexeme='z', literal=null, pos=Pos(guest_program/01_hello_world.dm,10,5))
 Token(type=EQUAL, lexeme='=', literal=null, pos=Pos(guest_program/01_hello_world.dm,10,7))
 Token(type=IDENTIFIER, lexeme='x', literal=null, pos=Pos(guest_program/01_hello_world.dm,10,9))
-Token(type=IDENTIFIER, lexeme='Typeof', literal=null, pos=Pos(guest_program/01_hello_world.dm,10,11))
+Token(type=TYPEOF, lexeme='typeof', literal=null, pos=Pos(guest_program/01_hello_world.dm,10,11))
 Token(type=BOOL, lexeme='bool', literal=null, pos=Pos(guest_program/01_hello_world.dm,10,18))
 Token(type=SEMICOLON, lexeme=';', literal=null, pos=Pos(guest_program/01_hello_world.dm,10,22))
 Token(type=VOID, lexeme='void', literal=null, pos=Pos(guest_program/01_hello_world.dm,12,1))

@@ -11,10 +11,11 @@ public enum TokenType {
     // TYPE KEYWORDS
     NUM,
     STRING,
-    BOOLEAN,
+    BOOL,
     VOID,
     ANY,
     FUNC,
+    ENUM,
 
     // DECLARATION KEYWORDS
     VAR,
@@ -30,12 +31,12 @@ public enum TokenType {
     // CONTROL FLOW KEYWORDS
     IF,
     ELSE,
-    MATCH,
     TERNARY,
     FOR,
     WHILE,
     RETURN,
     BREAK,
+    MATCH,
 
     // BOOLEAN
     TRUE,
@@ -77,6 +78,8 @@ public enum TokenType {
     // INCREMENT DECREMENT OPERATORS
     PLUS_PLUS,
     MINUS_MINUS,
+
+    TYPEOF,
 
     // DELIMITERS
     LEFT_PAREN,

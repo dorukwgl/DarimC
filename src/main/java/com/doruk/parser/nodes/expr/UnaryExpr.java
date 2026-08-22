@@ -5,6 +5,7 @@ import com.doruk.parser.interfaces.Expr;
 
 public record UnaryExpr(
     Token operator,
+    boolean isPrefix,
     Expr expr
 ) implements Expr {
 }

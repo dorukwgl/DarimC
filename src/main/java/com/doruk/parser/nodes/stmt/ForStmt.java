@@ -9,7 +9,7 @@ import java.util.List;
 
 public record ForStmt(
         Token keyword,
-        Token qualifier,          // var/const/null
+        Token modifier,          // var/final/null
         List<VariableDecl> variables,
         Expr iterable,
         BlockStmt body

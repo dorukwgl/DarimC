@@ -4,7 +4,7 @@ import com.doruk.dto.Token;
 import com.doruk.parser.interfaces.TypeNode;
 
 public record VariableDecl(
-    Token name,
+    Token identifier,
     TypeNode type
 ){
 }

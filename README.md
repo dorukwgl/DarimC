@@ -23,7 +23,7 @@
    - 6.1 [If / Elif / Else](#61-if--elif--else)
    - 6.2 [For Loops](#62-for-loops)
    - 6.3 [While Loops](#63-while-loops)
-   - 6.4 [Switch / Pattern Matching](#64-switch--pattern-matching)
+   - 6.4 [Match Expression](#64-match-expression)
 7. [Functions](#7-functions)
 8. [Lambdas](#8-lambdas)
 9. [Memory Model](#9-memory-model)
@@ -86,9 +86,9 @@ Darim uses **Pratt parsing** for expression evaluation (enabling correct operato
 Every Darim program needs a `main` function as its entry point. Files use the `.d` extension.
 
 ```darim
-// hello.d
+# hello.d
 void main(args: tuple) {
-    displayLn("Hello, World!")
+    displayLn("Hello, World!");
 }
 ```
 
@@ -116,11 +116,11 @@ Darim uses two keywords for declaring variables:
 - `final` — declares an immutable constant (value cannot be reassigned)
 
 ```darim
-var x = 10          // mutable, inferred as number
-final pi = 3.14159  // immutable constant
+var x = 10;          # mutable, inferred as number
+final pi = 3.14159;  # immutable constant
 
-var name = "darim"  // inferred as string
-var flag = true     // inferred as boolean
+var name = "darim";  # inferred as string
+var flag = true;     # inferred as bool
 ```
 
 ### Explicit Type Annotation
@@ -128,9 +128,9 @@ var flag = true     // inferred as boolean
 You can optionally annotate the type:
 
 ```darim
-var count: num = 0
-var label: string = "hello"
-var active: boolean = false
+var count: num = 0;
+var label: string = "hello";
+var active: bool = false;
 ```
 
 Type annotations are required in some contexts (e.g., typed function parameters, explicit array element access). See each section for details.
@@ -140,18 +140,19 @@ Type annotations are required in some contexts (e.g., typed function parameters,
 Darim infers the type from the right-hand side at declaration time. Once inferred, the type is fixed:
 
 ```darim
-var x = 5
-x = 10      // OK, still a number
-x = "text"  // ERROR: type mismatch, x is number
+var x = 5;
+x = 10;      # OK, still a number
+x = "text";  # ERROR: type mismatch, x is number
 ```
 
-### Implicit Type Casting
+### Explicit Type Casting
 
-In certain contexts, Darim performs implicit type casting. For example, assigning an array element (which has no type) to a typed variable:
+Arrays are untyped, so reading a typed value from them requires an explicit cast with `as`, or a typed accessor:
 
 ```darim
-var arr = new {1, 2, 3}
-var n: num = arr[0]   // implicit cast: array element → number
+var arr = new {1, 2, 3};
+var n: num = arr[0] as num;   # explicit cast: array element → number
+var m = arr.num(0);           # typed accessor: same cast, VM throws on failure
 ```
 
 If the cast fails at runtime, an error is thrown.
@@ -167,22 +168,22 @@ If the cast fails at runtime, an error is thrown.
 All numeric values in Darim are unified under a single `num` type. This covers integers and floating-point values.
 
 ```darim
-var a = 42
-var b = 3.14
-var c = -7
-var d: num = 100
+var a = 42;
+var b = 3.14;
+var c = -7;
+var d: num = 100;
 ```
 
 **Arithmetic:**
 
 ```darim
-var sum = 10 + 3      // 13
-var diff = 10 - 3     // 7
-var prod = 4 * 5      // 20
-var quot = 10 / 4     // 2.5
-var mod = 10 % 3      // 1
-var floor = 11 // 4   // 2  (floor division)
-var power = 2 ^ 8     // 256
+var sum = 10 + 3;      # 13
+var diff = 10 - 3;     # 7
+var prod = 4 * 5;      # 20
+var quot = 10 / 4;     # 2.5
+var mod = 10 % 3;      # 1
+var floor = 11 // 4;   # 2  (floor division)
+var power = 2 ^ 8;     # 256
 ```
 
 **Truthy / Falsy:**
@@ -190,9 +191,9 @@ var power = 2 ^ 8     // 256
 `0` is falsy; all other numbers are truthy.
 
 ```darim
-var x = 0
-if x: displayLn("truthy")   // not printed
-if x + 1: displayLn("yes")  // printed, because 1 is truthy
+var x = 0;
+if x: displayLn("truthy");   # not printed
+if x + 1: displayLn("yes");  # printed, because 1 is truthy
 ```
 
 > **🔮 Future Enhancement:** Separate `int` and `float` types, unsigned integers (`uint`), and bitwise operations (`&`, `|`, `^`, `~`, `<<`, `>>`).
@@ -204,31 +205,31 @@ if x + 1: displayLn("yes")  // printed, because 1 is truthy
 Boolean values are `true` and `false`.
 
 ```darim
-var yes = true
-var no = false
-var flag: boolean = true
+var yes = true;
+var no = false;
+var flag: bool = true;
 ```
 
 **Truthy and Falsy Values:**
 
-The following values are **falsy** in boolean context:
+The following values are **falsy** in bool context:
 
 - `false`
 - `0`
 - `null`
-- Empty collections: `[]`, `{}`, `()`, empty `Map`, empty `Set`
+- Empty collections: `[]`, `{}`, empty `Map`, empty `Set`
 
 Everything else is **truthy**.
 
 ```darim
-var arr = new []
-if arr: displayLn("has items")   // not printed, empty array is falsy
+var arr = new [];
+if arr: displayLn("has items");   # not printed, empty array is falsy
 
-var map = new Map()
-if !map: displayLn("empty map")  // printed
+var map = new Map();
+if !map: displayLn("empty map");  # printed
 
-var x: boolean = 0   // x is false (implicit cast from number)
-var y: boolean = "hi" // y is true (non-null string is truthy)
+var x: bool = 0;    # x is false (implicit cast from number)
+var y: bool = "hi"; # y is true (non-null string is truthy)
 ```
 
 ---
@@ -238,9 +239,9 @@ var y: boolean = "hi" // y is true (non-null string is truthy)
 Strings are **immutable** and **non-iterable** by default.
 
 ```darim
-var greeting = "Hello, World!"
-var name = "Darim"
-var full = greeting + " " + name  // concatenation
+var greeting = "Hello, World!";
+var name = "Darim";
+var full = greeting + " " + name;  # concatenation
 ```
 
 #### Stack vs Heap Strings
@@ -248,57 +249,57 @@ var full = greeting + " " + name  // concatenation
 By default, strings are stored on the **stack**. Use `new` to allocate on the **heap**:
 
 ```darim
-var s = "short string"           // stack allocation
-var large = new "heap string"    // heap allocation
+var s = "short string";           # stack allocation
+var large = new "heap string";    # heap allocation
 ```
 
 Heap-allocated strings persist beyond their defining scope and can hold much larger content (useful for reading entire files). When you reassign a heap string, the new value is also written to the heap.
 
 ```darim
-var file = new ""
-file = readFile(openFile("data.txt", FileMode.Read))  // safe, heap-allocated
+var file = new "";
+file = readFile(openFile("data.txt", FileMode.Read));  # safe, heap-allocated
 ```
 
 **String Methods:**
 
 ```darim
-var s = "Hello, World!"
+var s = "Hello, World!";
 
-// Substring: substr(str, start, length)
-var sub = substr(s, 7, 5)         // "World"
+# Substring: substr(str, start, length)
+var sub = substr(s, 7, 5);         # "World"
 
-// Index search
-var i = indexOf(s, "World")       // 7
-var li = lastIndexOf(s, "l")      // 10
+# Index search
+var i = indexOf(s, "World");       # 7
+var li = lastIndexOf(s, "l");      # 10
 
-// Case
-var up = ucase(s)                 // "HELLO, WORLD!"
-var lo = lcase(s)                 // "hello, world!"
+# Case
+var up = ucase(s);                 # "HELLO, WORLD!"
+var lo = lcase(s);                 # "hello, world!"
 
-// Trim
-var padded = "  hello  "
-var trimmed = trim(padded)        // "hello"
-var lt = ltrim(padded)            // "hello  "
-var rt = rtrim(padded)            // "  hello"
+# Trim
+var padded = "  hello  ";
+var trimmed = trim(padded);        # "hello"
+var lt = ltrim(padded);            # "hello  "
+var rt = rtrim(padded);            # "  hello"
 
-// Replace
-var r = replace(s, "World", "Darim")     // "Hello, Darim!"
-var ra = replaceAll(s, "l", "L")         // "HeLLo, WorLd!"
+# Replace
+var r = replace(s, "World", "Darim");     # "Hello, Darim!"
+var ra = replaceAll(s, "l", "L");         # "HeLLo, WorLd!"
 
-// Split: single arg = character array; two args = split by delimiter
-var chars = strsplit(s)            // ['H','e','l','l','o',...]
-var words = strsplit(s, " ")       // ["Hello,", "World!"]
+# Split: single arg = character array; two args = split by delimiter
+var chars = strsplit(s);            # ['H','e','l','l','o',...]
+var words = strsplit(s, " ");       # ["Hello,", "World!"]
 
-// Prefix / suffix
-var starts = startsWith(s, "Hello")   // true
-var ends = endsWith(s, "World!")      // true
+# Prefix / suffix
+var starts = startsWith(s, "Hello");   # true
+var ends = endsWith(s, "World!");      # true
 
-// Length
-var len = length(s)               // 13
+# Length
+var len = length(s);               # 13
 
-// Comparison
-var eq = strEquals(s, "Hello, World!")   // true
-var cmp = strcmp(s, "Hello, Darim!")     // positive number (s > arg)
+# Comparison
+var eq = strEquals(s, "Hello, World!");   # true
+var cmp = strcmp(s, "Hello, Darim!");     # positive number (s > arg)
 ```
 
 **String Comparison:**
@@ -306,11 +307,11 @@ var cmp = strcmp(s, "Hello, Darim!")     // positive number (s > arg)
 Use `strEquals` for equality. Use `strcmp` for ordering (returns negative, zero, or positive):
 
 ```darim
-var a = "apple"
-var b = "banana"
+var a = "apple";
+var b = "banana";
 
-if strEquals(a, b): displayLn("equal")
-if strcmp(a, b) < 0: displayLn("apple comes first")  // printed
+if strEquals(a, b): displayLn("equal");
+if strcmp(a, b) < 0: displayLn("apple comes first");  # printed
 ```
 
 > **Note:** Strings are passed by reference but are an exception to the scope rule — you can safely return a `string` from a function even though it lives on the stack. See [Memory Model](#9-memory-model) for details.
@@ -326,8 +327,8 @@ Darim has two kinds of arrays with distinct memory and performance characteristi
 #### Dynamic Arrays (Heap)
 
 ```darim
-var arr = new []          // empty dynamic array
-var nums = new {1, 2, 3}  // initialized dynamic array
+var arr = new [];          # empty dynamic array
+var nums = new {1, 2, 3};  # initialized dynamic array
 ```
 
 - Stored on the **heap**
@@ -338,8 +339,8 @@ var nums = new {1, 2, 3}  // initialized dynamic array
 #### Fixed (Static) Arrays (Stack)
 
 ```darim
-var fixed = {1, 2, 3, "hello"}  // inferred size (4 elements)
-var sized = [50]                 // fixed array, 50 slots, uninitialized
+var fixed = {1, 2, 3, "hello"};  # inferred size (4 elements)
+var sized = [50];                # fixed array, 50 slots, uninitialized
 ```
 
 - Stored on the **stack**
@@ -352,14 +353,19 @@ var sized = [50]                 // fixed array, 50 slots, uninitialized
 Arrays are **zero-indexed**:
 
 ```darim
-var arr = new {10, 20, 30, 40}
+var arr = new {10, 20, 30, 40};
 
-var first = arr[0]     // 10
-var third = arr[2]     // 30
-arr[1] = 99            // assign at index
+var first = arr[0];     # 10
+var third = arr[2];     # 30
+arr[1] = 99;            # assign at index
 
-// Explicit type on access
-var n: num = arr[0]    // 10, cast to number
+# Explicit type on access — arrays are untyped, so cast with `as`
+var n: num = arr[0] as num;   # 10, cast to number
+
+# Typed accessors — the VM casts and throws on failure
+var m = arr.num(0);     # 10
+var s = arr.string(0);  # "10"
+var b = arr.bool(0);    # true
 ```
 
 > **⚠ Warning:** Indexing treats the array as fixed. On a dynamic array with 1 element, `arr[1] = 5` throws an index out of bounds error. Use `push` to grow dynamic arrays.
@@ -369,25 +375,25 @@ var n: num = arr[0]    // 10, cast to number
 Methods treat the array as **dynamic**. Using them on a fixed array throws an error.
 
 ```darim
-var arr = new []
+var arr = new [];
 
-// Push / PushFront
-push(arr, 5)           // arr = [5]
-push(arr, 10)          // arr = [5, 10]
-pushFront(arr, 1)      // arr = [1, 5, 10]
+# Push / PushFront
+push(arr, 5);           # arr = [5]
+push(arr, 10);          # arr = [5, 10]
+pushFront(arr, 1);      # arr = [1, 5, 10]
 
-// Pop — removes and returns last element
-var last = pop(arr)    // last = 10, arr = [1, 5]
+# Pop — removes and returns last element
+var last = pop(arr);    # last = 10, arr = [1, 5]
 
-// Shift — removes and returns first element, shifts left
-var first = shift(arr) // first = 1, arr = [5]
+# Shift — removes and returns first element, shifts left
+var first = shift(arr); # first = 1, arr = [5]
 
-// Length
-var len = length(arr)  // 1
+# Length
+var len = length(arr);  # 1
 
-// Contains check
-var found = arrayContains(arr, 5)  // true
-var nope  = arrayContains(arr, 99) // false
+# Contains check
+var found = arrayContains(arr, 5);  # true
+var nope  = arrayContains(arr, 99); # false
 ```
 
 > **Note on `arrayContains`:** This is the preferred way to search arrays. It is type-forgiving — on type mismatch it returns `false` rather than throwing an error, and it scans the entire array regardless of mismatches.
@@ -395,53 +401,53 @@ var nope  = arrayContains(arr, 99) // false
 #### Iteration
 
 ```darim
-var nums = new {10, 20, 30, 40}
+var nums = new {10, 20, 30, 40};
 
-// Value only
+# Value only
 for var item: num in nums: {
-    display(item)
+    display(item);
 }
 
-// Index and value
+# Index and value
 for var i, item: num in nums: {
-    displayLn("index: ", i, " value: ", item)
+    displayLn("index: ", i, " value: ", item);
 }
 
-// Range-based (manual index)
+# Range-based (manual index)
 for var i in 0..length(nums): {
-    var n: num = nums[i]
-    display(n)
+    var n: num = nums[i];
+    display(n);
 }
 ```
 
 #### Functional Utilities
 
 ```darim
-var nums = new {3, 1, 4, 1, 5, 9}
+var nums = new {3, 1, 4, 1, 5, 9};
 
-// Reverse in-place
-reverse(nums)                        // {9, 5, 1, 4, 1, 3}
+# Reverse in-place
+reverse(nums);                        # {9, 5, 1, 4, 1, 3}
 
-// Sort
-sortAsc(nums)                        // {1, 1, 3, 4, 5, 9}
-sortDesc(nums)                       // {9, 5, 4, 3, 1, 1}
+# Sort
+sortAsc(nums);                        # {1, 1, 3, 4, 5, 9}
+sortDesc(nums);                       # {9, 5, 4, 3, 1, 1}
 
-// Sort by key (lambda)
-var people = new []
-// ... populated with tuples (name, age)
-sortAsc(people, p => p[1])           // sort ascending by age
+# Sort by key (lambda)
+var people = new [];
+# ... populated with tuples (name, age)
+sortAsc(people, (p: tuple): num { return p[1]; });  # sort ascending by age
 
-// Map — transform each element
-var doubled = map(nums, x => x * 2)  // new array: each element doubled
+# Map — transform each element
+var doubled = map(nums, (x: num): num { return x * 2; });  # new array: each element doubled
 
-// Reduce — fold to single value
-var total = reduce(nums, (acc, val) => acc + val)  // sum of all
+# Reduce — fold to single value
+var total = reduce(nums, (acc: num, val: num): num { return acc + val; });  # sum of all
 
-// Length
-var size = length(nums)
+# Length
+var size = length(nums);
 ```
 
-> **🔮 Future Enhancement:** `filter`, `flatMap`, lazy iteration, and typed arrays (`var arr: number[] = new []`) that eliminate runtime casting overhead.
+> **🔮 Future Enhancement:** `filter`, `flatMap`, lazy iteration, and typed arrays (`var arr: num[] = new []`) that eliminate runtime casting overhead.
 
 ---
 
@@ -450,28 +456,28 @@ var size = length(nums)
 Tuples are **ordered, heterogeneous, immutable** collections.
 
 ```darim
-var point = Tuple(10, 20)
-var record = Tuple(42, "Alice", true)
-var empty = Tuple()
+var point = Tuple(10, 20);
+var record = Tuple(42, "Alice", true);
+var empty = Tuple();
 ```
 
-- Defined with `()` syntax
+- Defined with the `Tuple(...)` constructor — there is no paren-literal `(1, 2, 3)` syntax
 - Immutable — elements cannot be changed after creation
 - Indexed the same way as arrays (zero-based)
 - Stack-allocated by default; use `new` for heap allocation
 
 ```darim
-var t = Tuple(1, "hello", 3.14)
+var t = Tuple(1, "hello", 3.14);
 
-var n: num = t[0]       // 1
-var s: string = t[1]    // "hello"
-var f: num = t[2]       // 3.14
+var n: num = t[0];       # 1
+var s: string = t[1];    # "hello"
+var f: num = t[2];       # 3.14
 ```
 
 **Heap Tuples (returnable from functions):**
 
 ```darim
-var t = new Tuple(1, "hello")   // heap-allocated, safe to return
+var t = new Tuple(1, "hello");   # heap-allocated, safe to return
 ```
 
 **Multi-return (Tuples as Return Vehicles):**
@@ -487,50 +493,50 @@ See [Functions → Multi-return](#multi-value-return) for how tuples integrate w
 Maps are key-value stores. Keys must be `string` or `num`; values can be any type. Maps are always **heap-allocated**.
 
 ```darim
-// Empty map
-var m = new Map()
+# Empty map
+var m = new Map();
 
-// Map with initial entries (key, value pairs)
-var scores = new Map("alice", 95, "bob", 87, "carol", 92)
+# Map with initial entries (key, value pairs)
+var scores = new Map("alice", 95, "bob", 87, "carol", 92);
 ```
 
 **Methods:**
 
 ```darim
-var m = new Map("a", 1)
+var m = new Map("a", 1);
 
-// Add / update entry
-mapPut(m, "b", 2)
-mapPut(m, "a", 99)           // update existing
+# Add / update entry
+mapPut(m, "b", 2);
+mapPut(m, "a", 99);           # update existing
 
-// Get value
-var val = mapGet(m, "a")     // 99
-var safe = mapGet(m, "x", 0) // 0 (default), avoids error if key missing
+# Get value
+var val = mapGet(m, "a");     # 99
+var safe = mapGet(m, "x", 0); # 0 (default), avoids error if key missing
 
-// Check existence
-var has = mapContains(m, "b")   // true
-var miss = mapContains(m, "z")  // false
+# Check existence
+var has = mapContains(m, "b");   # true
+var miss = mapContains(m, "z");  # false
 
-// Add multiple at once (must have even number of args)
-mapPutAll(m, ("c", 3, "d", 4))
+# Add multiple at once (must have even number of args)
+mapPutAll(m, Tuple("c", 3, "d", 4));
 
-// Length
-var size = length(m)
+# Length
+var size = length(m);
 ```
 
 **Iteration:**
 
 ```darim
-var m = new Map("x", 10, "y", 20, "z", 30)
+var m = new Map("x", 10, "y", 20, "z", 30);
 
 for var k, v in m: {
-    displayLn("key: ", k, " value: ", v)
+    displayLn("key: ", k, " value: ", v);
 }
 ```
 
 > **⚠ Note:** `mapGet` throws an error if the key doesn't exist and no default is provided. Always use the two-argument form when the key may be absent.
 
-> **🔮 Future Enhancement:** Typed maps (`Map<string, number>`), ordered maps backed by red-black trees, and sorted iteration.
+> **🔮 Future Enhancement:** Typed maps (`Map<string, num>`), ordered maps backed by red-black trees, and sorted iteration.
 
 ---
 
@@ -539,40 +545,40 @@ for var k, v in m: {
 Sets are unordered collections of **unique** values. Sets are **statically typed** (all elements must share the same type) and always **heap-allocated**.
 
 ```darim
-// Empty set
-var s = new Set()
+# Empty set
+var s = new Set();
 
-// Set with initial values
-var primes = new Set(2, 3, 5, 7, 11)
-var tags   = new Set("alpha", "beta", "gamma")
+# Set with initial values
+var primes = new Set(2, 3, 5, 7, 11);
+var tags   = new Set("alpha", "beta", "gamma");
 ```
 
 **Methods:**
 
 ```darim
-var s = new Set(1, 2, 3)
+var s = new Set(1, 2, 3);
 
-// Add element (throws on type mismatch)
-setPut(s, 4)
+# Add element (throws on type mismatch)
+setPut(s, 4);
 
-// Add multiple
-setPutAll(s, (5, 6, 7))
+# Add multiple
+setPutAll(s, Tuple(5, 6, 7));
 
-// Check membership
-var has = setContains(s, 3)   // true
-var no  = setContains(s, 99)  // false
+# Check membership
+var has = setContains(s, 3);   # true
+var no  = setContains(s, 99);  # false
 
-// Length
-var size = length(s)
+# Length
+var size = length(s);
 ```
 
 **Iteration:**
 
 ```darim
-var s = new Set("a", "b", "c")
+var s = new Set("a", "b", "c");
 
 for var item in s: {
-    displayLn(item)
+    displayLn(item);
 }
 ```
 
@@ -597,20 +603,20 @@ enum Status {
 **Usage:**
 
 ```darim
-var dir: Direction = Direction.North
+var dir: Direction = Direction.North;
 
-switch (dir) {
-    case North -> displayLn("going north")
-    case South -> displayLn("going south")
-    default    -> displayLn("going sideways")
+match dir {
+    North { displayLn("going north"); }
+    South { displayLn("going south"); }
+    _ { displayLn("going sideways"); }
 }
 ```
 
 **Enum Methods:**
 
 ```darim
-var name = enumName(Direction.North)     // "North"
-var val  = fromName(Direction, "South")  // Direction.South
+var name = enumName(Direction.North);     # "North"
+var val  = fromName(Direction, "South");  # Direction.South
 ```
 
 ---
@@ -632,27 +638,27 @@ var val  = fromName(Direction, "South")  // Direction.South
 ### Comparison Operators
 
 ```darim
-var a = 5
-var b = 10
+var a = 5;
+var b = 10;
 
-a == b    // false
-a != b    // true
-a < b     // true
-a > b     // false
-a <= b    // true
-a >= b    // false
+a == b;    # false
+a != b;    # true
+a < b;     # true
+a > b;     # false
+a <= b;    # true
+a >= b;    # false
 ```
 
 ### Logical Operators
 
 ```darim
-var x = true
-var y = false
+var x = true;
+var y = false;
 
-x and y   // false
-x or y    // true
-not x     // false
-!x        // false (shorthand for not)
+x and y;   # false
+x or y;    # true
+not x;     # false
+!x;        # false (shorthand for not)
 ```
 
 ### Between Operator
@@ -660,34 +666,44 @@ not x     // false
 The `bet` operator checks if a value falls within a range (inclusive on both ends). The two range operands can be in any order:
 
 ```darim
-var x = 5
+var x = 5;
 
-if x bet 1, 10: displayLn("in range")    // printed
-if x bet 10, 1: displayLn("also works")  // also printed (order doesn't matter)
-if x bet 6, 10: displayLn("out")         // not printed
+if x bet 1, 10: displayLn("in range");    # printed
+if x bet 10, 1: displayLn("also works");  # also printed (order doesn't matter)
+if x bet 6, 10: displayLn("out");         # not printed
+
+# Assigns a bool result
+var inRange: bool = 15 bet 10, 20;   # true
 ```
 
 ### Operator Precedence
 
-Evaluated left to right within the same tier. Higher tiers evaluate first.
+Higher tiers evaluate first. Within a tier, operators are left-associative unless noted.
 
-| Tier | Operators                          |
-|------|------------------------------------|
-| 1st  | `math.*` function calls            |
-| 2nd  | `()` parentheses / grouping        |
-| 3rd  | `^` exponentiation                 |
-| 4th  | `%`, `//` modulo and floor div     |
-| 5th  | `/`, `*` division and multiply     |
-| 6th  | `+`, `-` addition and subtraction  |
-| 7th  | `<`, `>`, `<=`, `>=`, `==`, `!=`   |
-| 8th  | `not`, `!`                         |
-| 9th  | `and`, `or`                        |
+| Tier  | Operators                                   | Associativity |
+|-------|---------------------------------------------|---------------|
+| 1st   | `()` call, `[]` index, `.` member, `++` `--` postfix | left          |
+| 2nd   | `!` `not` `-` `+` prefix unary, `++` `--` prefix    | —             |
+| 3rd   | `as` cast                                    | —             |
+| 4th   | `^` exponentiation                           | **right**     |
+| 5th   | `*` `/` `%` `//`                             | left          |
+| 6th   | `+` `-`                                      | left          |
+| 7th   | `..` range                                   | left          |
+| 8th   | `<` `>` `<=` `>=`                            | left          |
+| 9th   | `==` `!=`                                    | left          |
+| 10th  | `bet` (x bet lo, hi)                         | —             |
+| 11th  | `&&` / `and`                                 | left          |
+| 12th  | `\|\|` / `or`                                | left          |
+| 13th  | `?:` ternary                                 | right         |
+| 14th  | `=` `+=` `-=` `*=` `/=` `^=` `%=`            | right         |
+
+Prefix unary binds **tighter than `^`**, so `-2 ^ 2` parses as `(-2) ^ 2` = `4` (not `-(2 ^ 2)`). Assignment is the loosest operator, so `var a = 5 >= b` gives `a` the bool result of `5 >= b`.
 
 Use parentheses to override:
 
 ```darim
-var result = 2 + 3 * 4      // 14 (not 20)
-var forced = (2 + 3) * 4    // 20
+var result = 2 + 3 * 4;      # 14 (not 20)
+var forced = (2 + 3) * 4;    # 20
 ```
 
 ### Expression Folding (Compile-time)
@@ -695,15 +711,15 @@ var forced = (2 + 3) * 4    // 20
 Darim's compiler folds constant expressions at compile time:
 
 ```darim
-final TAX = 0.13
-return 1000 + 1000 * TAX   // compiled as: return 1130.0
+final TAX = 0.13;
+return 1000 + 1000 * TAX;   # compiled as: return 1130.0
 ```
 
 This only applies when all operands are constants or `final` variables. If any operand is `var`, folding is skipped:
 
 ```darim
-var rate = 0.13
-return 1000 + 1000 * rate  // not folded; evaluated at runtime
+var rate = 0.13;
+return 1000 + 1000 * rate;  # not folded; evaluated at runtime
 ```
 
 ---
@@ -713,39 +729,39 @@ return 1000 + 1000 * rate  // not folded; evaluated at runtime
 ### 6.1 If / Elif / Else
 
 ```darim
-var score = 75
+var score = 75;
 
-if score >= 90: displayLn("A")
-elif score >= 75: displayLn("B")   // printed
-elif score >= 60: displayLn("C")
-else displayLn("F")
+if score >= 90: displayLn("A");
+elif score >= 75: displayLn("B");   # printed
+elif score >= 60: displayLn("C");
+else displayLn("F");
 ```
 
 Block form (multiple statements):
 
 ```darim
-var x = 10
+var x = 10;
 
 if x > 5: {
-    displayLn("x is greater than 5")
-    displayLn("x = ", x)
+    displayLn("x is greater than 5");
+    displayLn("x = ", x);
 }
 elif x == 5: {
-    displayLn("x is exactly 5")
+    displayLn("x is exactly 5");
 }
 else {
-    displayLn("x is less than 5")
+    displayLn("x is less than 5");
 }
 ```
 
 Conditions can use any truthy/falsy value:
 
 ```darim
-var arr = new {1, 2, 3}
-if arr: displayLn("array has elements")  // truthy: non-empty
+var arr = new {1, 2, 3};
+if arr: displayLn("array has elements");  # truthy: non-empty
 
-var empty = new []
-if !empty: displayLn("empty array")       // falsy: empty
+var empty = new [];
+if !empty: displayLn("empty array");       # falsy: empty
 ```
 
 ---
@@ -757,23 +773,23 @@ if !empty: displayLn("empty array")       // falsy: empty
 The range `a..b` is **exclusive** on the upper bound (iterates `a` to `b-1`):
 
 ```darim
-for var i in 1..5: display(i)      // prints: 1 2 3 4
-for var i in 10..1: display(i)     // prints: 10 9 8 ... 2 (descending)
+for var i in 1..5: display(i);      # prints: 1 2 3 4
+for var i in 10..1: display(i);     # prints: 10 9 8 ... 2 (descending)
 ```
 
 #### Collection Iteration
 
 ```darim
-var fruits = new {"apple", "banana", "cherry"}
+var fruits = new {"apple", "banana", "cherry"};
 
-// Value only
+# Value only
 for var item: string in fruits: {
-    displayLn(item)
+    displayLn(item);
 }
 
-// Index and value
+# Index and value
 for var i, item: string in fruits: {
-    displayLn(i, ": ", item)
+    displayLn(i, ": ", item);
 }
 ```
 
@@ -781,8 +797,8 @@ for var i, item: string in fruits: {
 
 ```darim
 for var i in 1..100: {
-    if i == 5: break
-    display(i)    // prints 1 2 3 4
+    if i == 5: break;
+    display(i);    # prints 1 2 3 4
 }
 ```
 
@@ -791,9 +807,9 @@ for var i in 1..100: {
 ```darim
 for var i in 1..4: {
     for var j in 1..4: {
-        display(i * j, " ")
+        display(i * j, " ");
     }
-    displayLn("")
+    displayLn("");
 }
 ```
 
@@ -802,79 +818,81 @@ for var i in 1..4: {
 ### 6.3 While Loops
 
 ```darim
-var i = 0
+var i = 0;
 while i < 5: {
-    displayLn(i)
-    i = i + 1
+    displayLn(i);
+    i = i + 1;
 }
 
-// Post-increment in condition
-var x = 1
-while (x++ < 5): display(x)   // prints 2 3 4 5
+# Post-increment in condition
+var x = 1;
+while (x++ < 5): display(x);   # prints 2 3 4 5
 ```
 
 While loops also support `break`:
 
 ```darim
-var n = 0
+var n = 0;
 while true: {
-    n = n + 1
-    if n == 10: break
+    n = n + 1;
+    if n == 10: break;
 }
-displayLn(n)  // 10
+displayLn(n);  # 10
 ```
 
 ---
 
-### 6.4 Switch / Pattern Matching
+### 6.4 Match Expression
 
-#### Basic Switch
+`match` is an expression that compares a value against patterns and runs the first arm whose pattern matches. `_` is the default arm. Arms are written `pattern { block }` — there is no `case`/`default` keyword.
+
+#### Basic Match
 
 ```darim
-var day = "Monday"
+var day = "Monday";
 
-switch (day) {
-    case "Saturday" -> displayLn("weekend")
-    case "Sunday"   -> displayLn("weekend")
-    default         -> displayLn("weekday")    // printed
+match day {
+    "Saturday" { displayLn("weekend"); }
+    "Sunday"   { displayLn("weekend"); }
+    _          { displayLn("weekday"); }    # printed
 }
 ```
 
-#### Switch as Expression
+#### Match as Expression
 
-The switch statement can return a value:
+The match expression can return a value — the matched arm's block ends with the value it produces:
 
 ```darim
-var op = "+"
-var a = 10
-var b = 3
+var op = "+";
+var a = 10;
+var b = 3;
 
-var result = switch (op) {
-    case "+" -> a + b
-    case "-" -> a - b
-    case "*" -> a * b
-    case "/" -> a / b
-    default  -> 0
-}
-displayLn(result)  // 13
+var result = match op {
+    "+" { a + b; }
+    "-" { a - b; }
+    "*" { a * b; }
+    "/" { a / b; }
+    _   { 0; }
+};
+displayLn(result);  # 13
 ```
 
-#### Enum Switch
+#### Enum Match
 
 ```darim
 enum Season { Spring, Summer, Autumn, Winter }
 
-var s: Season = Season.Winter
+var s: Season = Season.Winter;
 
-switch (s) {
-    case Spring -> displayLn("flowers")
-    case Summer -> displayLn("sun")
-    case Autumn -> displayLn("leaves")
-    case Winter -> displayLn("snow")    // printed
+match s {
+    Spring { displayLn("flowers"); }
+    Summer { displayLn("sun"); }
+    Autumn { displayLn("leaves"); }
+    Winter { displayLn("snow"); }    # printed
 }
 ```
 
-> **🔮 Future Enhancement:** Structural pattern matching (`match x { (a, b) -> ... }`) for destructuring tuples and other compound values.
+> **🔮 Future Enhancement:** Structural pattern matching (`match x { (a, b) { ... } }`) for destructuring tuples and other compound values.
 
 ---
 
@@ -885,19 +903,19 @@ Functions must declare their return type. Parameters must be typed.
 ### Basic Functions
 
 ```darim
-// No return value
+# No return value
 void greet(name: string) {
-    displayLn("Hello, ", name)
+    displayLn("Hello, ", name);
 }
 
-// Returns a value
+# Returns a value
 num square(x: num) {
-    return x * x
+    return x * x;
 }
 
-// Multiple parameters
+# Multiple parameters
 num add(a: num, b: num) {
-    return a + b
+    return a + b;
 }
 ```
 
@@ -905,11 +923,11 @@ num add(a: num, b: num) {
 
 ```darim
 string formatName(first: string, last: string = "Unknown") {
-    return first + " " + last
+    return first + " " + last;
 }
 
-formatName("Alice", "Smith")   // "Alice Smith"
-formatName("Bob")              // "Bob Unknown"
+formatName("Alice", "Smith");   # "Alice Smith"
+formatName("Bob");              # "Bob Unknown"
 ```
 
 Default arguments must be constants or literals. They are resolved at compile time (the compiler inserts the default value at each call site that omits the argument).
@@ -920,10 +938,10 @@ Variadic arguments are collected into a **tuple**:
 
 ```darim
 num addAll(nums*: num) {
-    return reduce(nums, (a, b) => a + b)
+    return reduce(nums, (a: num, b: num): num { return a + b; });
 }
 
-var total = addAll(1, 2, 3, 4, 5)   // 15
+var total = addAll(1, 2, 3, 4, 5);   # 15
 ```
 
 The compiler wraps the variable arguments into a tuple automatically at each call site.
@@ -934,30 +952,30 @@ Functions can return more than one value:
 
 ```darim
 num, string describe(x: num) {
-    if x > 0: return x, "positive"
-    elif x < 0: return x, "negative"
-    else return 0, "zero"
+    if x > 0: return x, "positive";
+    elif x < 0: return x, "negative";
+    else return 0, "zero";
 }
 ```
 
 **Calling multi-return functions:**
 
 ```darim
-var n, label = describe(42)    // n=42, label="positive"
-var _, label = describe(-5)    // ignore first value
-var n = describe(10)           // only first value captured
+var n, label = describe(42);    # n=42, label="positive"
+var _, label = describe(-5);    # ignore first value
+var n = describe(10);           # only first value captured
 ```
 
 Use `_` as a placeholder to skip return values you don't need:
 
 ```darim
-num, string, boolean complexResult() {
-    return 42, "hello", true
+num, string, bool complexResult() {
+    return 42, "hello", true;
 }
 
-var _, s, _ = complexResult()   // only the string
-var a, b, c = complexResult()   // all three
-var a       = complexResult()   // only the first
+var _, s, _ = complexResult();   # only the string
+var a, b, c = complexResult();   # all three
+var a       = complexResult();   # only the first
 ```
 
 ### Pass by Value vs Reference
@@ -966,7 +984,7 @@ Understanding this is critical for avoiding bugs.
 
 | Type                              | Passed By   |
 |-----------------------------------|-------------|
-| `num`, `boolean`                  | **Value**   |
+| `num`, `bool`                     | **Value**   |
 | `string`                          | Reference   |
 | `tuple` (stack)                   | Reference   |
 | `tuple` (heap, `new`)             | Reference   |
@@ -978,20 +996,20 @@ Numbers and booleans are **copied** on every function call — mutations inside 
 
 ```darim
 void double(x: num) {
-    x = x * 2         // does NOT affect caller's variable
+    x = x * 2;         # does NOT affect caller's variable
 }
 
 void appendItem(arr: array, item: num) {
-    push(arr, item)   // DOES affect caller's array (shared reference)
+    push(arr, item);   # DOES affect caller's array (shared reference)
 }
 
-var n = 5
-double(n)
-displayLn(n)   // still 5
+var n = 5;
+double(n);
+displayLn(n);   # still 5
 
-var list = new {1, 2}
-appendItem(list, 3)
-displayLn(length(list))  // 3 — list was mutated
+var list = new {1, 2};
+appendItem(list, 3);
+displayLn(length(list));  # 3 — list was mutated
 ```
 
 ---
@@ -1002,66 +1020,81 @@ Lambdas are anonymous functions and are **first-class citizens** in Darim. They 
 
 ### Syntax
 
-```darim
-// Arrow lambda (last expression is implicitly returned)
-const double = (x: num) => x * 2
-
-// Block lambda (explicit return not required; last statement returned)
-const greet = (name: string) => {
-    var msg = "Hello, " + name
-    msg
-}
-```
-
-### Lambda Type Annotation
+A lambda is a typed parameter list followed by a `: returnType` and a block. Unnamed lambdas are passed directly to a call; a `final` declaration names one (a lambda reference never changes, so `final` fits):
 
 ```darim
-const fun: lambda(num, string): num = (a, b) => {
-    displayLn("number: ", a)
-    a * 2
-}
+# Named lambda
+final add = (a: num, b: num): num { return a + b; };
+
+# Unnamed lambda passed directly to a call
+testCallback((a: num, b: string): bool { return a == 1; });
 ```
 
-The lambda type syntax is: `lambda(paramTypes...):returnType`
+The parser recognizes a bare `(` followed by typed parameters and `: returnType` as a lambda, not a grouping. When passing an existing lambda, just name it:
+
+```darim
+testCallback(add);
+```
+
+### Lambda Function Types
+
+The type of a function or lambda uses the `func` keyword — parameter types, then return type after the colon:
+
+```darim
+func(num, num): num            # two params, one return
+func(): void                   # no params, no return
+func(): string                 # no params, returns string
+func(num, string): num, string # returns multiple values
+```
+
+Typed annotation for a lambda variable:
+
+```darim
+final fun: func(num, string): num = (a: num, b: string): num {
+    displayLn("number: ", a);
+    return a * 2;
+};
+```
 
 ### Lambdas as Arguments
 
 ```darim
-var nums = new {5, 3, 8, 1, 9}
+var nums = new {5, 3, 8, 1, 9};
 
-sortAsc(nums, x => x)            // sort by identity
-var doubled = map(nums, x => x * 2)
-var sum = reduce(nums, (a, b) => a + b)
+sortAsc(nums, (x: num): num { return x; });           # sort by identity
+var doubled = map(nums, (x: num): num { return x * 2; });
+var sum = reduce(nums, (a: num, b: num): num { return a + b; });
 ```
 
 ### Lambdas as Return Values
 
 ```darim
-lambda:(num):num makeMultiplier(factor: num) {
-    const fn: lambda(num):num = (x) => x * factor
-    return fn
+func(num): num makeMultiplier(factor: num) {
+    final f = factor;
+    final fn = (x: num): num { return x * f; };
+    return fn;
 }
 
-var triple = makeMultiplier(3)
-displayLn(triple(5))   // 15
+var triple = makeMultiplier(3);
+displayLn(triple(5));   # 15
 ```
 
 ### Scope and Variable Capture
 
-> **⚠ Important:** Lambdas in Darim do **not** form closures. They can _access_ variables from their outer scope at the moment of execution, but those variables are not "captured" — they are not kept alive by the lambda.
+> **⚠ Important:** Lambdas in Darim do **not** form closures. A lambda can read globals and any variable still in scope where it runs (like Java). No variable is kept alive by the lambda — except a `final` constant, which can be captured safely because capturing it copies its value from one stack frame to another.
 
 ```darim
-lambda:(num):num makeAdder() {
-    var base = 10
-    const fn: lambda(num):num = (x) => base + x
+func(num): num makeAdder() {
+    var base = 10;
+    final fn = (x: num): num { return base + x; };
 
-    var r = fn(5)      // works: base is still in scope here → 15
-    return fn          // fn is returned, but base is NOT captured
+    var r = fn(5);      # works: base is still in scope here → 15
+    return fn;          # fn is returned; base is NOT captured (it's a var)
 }
 
 void main(args: tuple) {
-    var adder = makeAdder()
-    adder(5)           // ERROR: base is out of scope and was freed
+    var adder = makeAdder();
+    adder(5);           # ERROR: base is out of scope and was freed
 }
 ```
 
@@ -1073,15 +1106,21 @@ void main(args: tuple) {
 - Global variables are in scope for lambdas but global state is generally discouraged
 
 ```darim
-// SAFE: value passed as argument
-var nums = new {1, 2, 3}
-var factor = 3
-var scaled = map(nums, x => x * factor)  // factor is captured at call site
+# SAFE: value passed as argument
+var nums = new {1, 2, 3};
+var factor = 3;
+var scaled = map(nums, (x: num): num { return x * factor; });  # factor still in scope at the call
 
-// UNSAFE: returning a lambda that references a stack variable
-lambda:():num badAdder() {
-    var x = 5
-    return () => x + 1  // x is freed when badAdder exits
+# SAFE: a `final` constant is captured by copying its value
+func(num): num makeMultiplier(factor: num) {
+    final f = factor;
+    return (x: num): num { return x * f; };  # f's value is copied into the lambda's frame
+}
+
+# UNSAFE: returning a lambda that references a stack `var`
+func(): num badAdder() {
+    var x = 5;
+    return (): num { return x + 1; };  # x is freed when badAdder exits
 }
 ```
 
@@ -1097,7 +1136,7 @@ Darim manages memory explicitly, without relying on the host language's GC. Unde
 
 | Type                         | Location  | Notes                                  |
 |------------------------------|-----------|----------------------------------------|
-| `num`, `boolean`             | Stack     | Pass by value; safe to return          |
+| `num`, `bool`                | Stack     | Pass by value; safe to return          |
 | `string` (no `new`)          | Stack     | **Exception:** safe to return          |
 | `string` (with `new`)        | Heap      | Safe to return, survives scope         |
 | `tuple` (no `new`)           | Stack     | **Unsafe** to return; returns null     |
@@ -1112,40 +1151,40 @@ Darim manages memory explicitly, without relying on the host language's GC. Unde
 A common source of bugs is returning stack-allocated reference types. Their memory is freed when the function exits:
 
 ```darim
-// UNSAFE: fixed array returned by reference — memory freed on exit
+# UNSAFE: fixed array returned by reference — memory freed on exit
 {num} badArray() {
-    var arr = {1, 2, 3}
-    return arr    // returns a dangling pointer → null
+    var arr = {1, 2, 3};
+    return arr;    # returns a dangling pointer → null
 }
 
-// SAFE: dynamic array on heap
+# SAFE: dynamic array on heap
 array goodArray() {
-    var arr = new {1, 2, 3}
-    return arr    // heap memory persists
+    var arr = new {1, 2, 3};
+    return arr;    # heap memory persists
 }
 
-// SAFE: numbers are value types
+# SAFE: numbers are value types
 num safeNumber() {
-    var x = 42
-    return x      // copied, safe
+    var x = 42;
+    return x;      # copied, safe
 }
 
-// SAFE: strings are the exception
+# SAFE: strings are the exception
 string safeString() {
-    var s = "hello"
-    return s      // safe despite being on stack
+    var s = "hello";
+    return s;      # safe despite being on stack
 }
 
-// UNSAFE: stack tuple
+# UNSAFE: stack tuple
 tuple badTuple() {
-    var t = (1, 2, 3)
-    return t      // null on caller side
+    var t = Tuple(1, 2, 3);
+    return t;      # null on caller side
 }
 
-// SAFE: heap tuple
+# SAFE: heap tuple
 tuple goodTuple() {
-    var t = new (1, 2, 3)
-    return t      // safe
+    var t = new Tuple(1, 2, 3);
+    return t;      # safe
 }
 ```
 
@@ -1166,49 +1205,49 @@ Variables in Darim are **block-scoped**. A variable is accessible from the point
 ### Lexical Scoping
 
 ```darim
-var x = 4
+var x = 4;
 
 void outer() {
-    var y = 10
+    var y = 10;
 
     void inner() {
-        displayLn(x)   // 4 — found in outer file scope
-        displayLn(y)   // 10 — found in outer()
+        displayLn(x);   # 4 — found in outer file scope
+        displayLn(y);   # 10 — found in outer()
     }
-    inner()
+    inner();
 }
 
-outer()
+outer();
 ```
 
 When a name is referenced, Darim searches from the innermost scope outward:
 
 ```darim
-var x = 1
+var x = 1;
 
 void test() {
-    var x = 2        // shadows the outer x
-    displayLn(x)     // 2
+    var x = 2;        # shadows the outer x
+    displayLn(x);     # 2
 }
 
-test()
-displayLn(x)         // 1
+test();
+displayLn(x);         # 1
 ```
 
 ### Scope in Loops and Blocks
 
 ```darim
 for var i in 1..5: {
-    var temp = i * 2
-    displayLn(temp)
+    var temp = i * 2;
+    displayLn(temp);
 }
-// temp is not accessible here — out of scope
+# temp is not accessible here — out of scope
 
-var total = 0
+var total = 0;
 for var i in 1..6: {
-    total = total + i  // total is accessible: declared outside the loop
+    total = total + i;  # total is accessible: declared outside the loop
 }
-displayLn(total)   // 15
+displayLn(total);   # 15
 ```
 
 ---
@@ -1219,58 +1258,64 @@ Darim programs can be split across multiple `.d` files.
 
 ### Visibility
 
-By default, all functions and variables are **private** to the file they are declared in. Use the `visible` keyword to expose them:
+By default, all functions and variables are **private** to the file they are declared in. `visible` is a separate statement that marks an already-declared symbol as exported:
 
 ```darim
-// math_utils.d
+# math_utils.d
 
-var PI = 3.14159
+var PI = 3.14159;
 
-visible num circleArea(r: num) {
-    return PI * r ^ 2
+num circleArea(r: num) {
+    return PI * r ^ 2;
 }
+visible circleArea;
 
-visible num circumference(r: num) {
-    return 2 * PI * r
+num circumference(r: num) {
+    return 2 * PI * r;
 }
+visible circumference;
 
-// PI is not visible — use a getter to expose it
-visible num getPI() { return PI }
+# PI is not visible — use a getter to expose it
+num getPI() { return PI; }
+visible getPI;
 ```
 
 ### Including Modules
 
 ```darim
-// main.d
-include math_utils as mu
+# main.d
+include math_utils as mu;
 
-var area = mu.circleArea(5.0)
-displayLn(area)
+var area = mu.circleArea(5.0);
+displayLn(area);
 
-displayLn(mu.getPI())   // 3.14159
+displayLn(mu.getPI());   # 3.14159
 ```
 
-The `include` keyword binds all `visible` symbols of the file to the given namespace.
+The `include` keyword binds all `visible` symbols of the file to the given namespace. Both `include` and `import` always require an `as <alias>` — there is no unaliased form.
 
 ### Setter Pattern
 
 `visible` variables appear as **constants** to importing files. To allow modification, expose a setter function:
 
 ```darim
-// config.d
-var threshold = 0.5
+# config.d
+var threshold = 0.5;
 
-visible num getThreshold() { return threshold }
-visible void setThreshold(v: num) { threshold = v }
+num getThreshold() { return threshold; }
+visible getThreshold;
+
+void setThreshold(v: num) { threshold = v; }
+visible setThreshold;
 ```
 
 ```darim
-// main.d
-include config as cfg
+# main.d
+include config as cfg;
 
-displayLn(cfg.getThreshold())   // 0.5
-cfg.setThreshold(0.75)
-displayLn(cfg.getThreshold())   // 0.75
+displayLn(cfg.getThreshold());   # 0.5
+cfg.setThreshold(0.75);
+displayLn(cfg.getThreshold());   # 0.75
 ```
 
 All files must be passed to the compiler explicitly, in leaf-first order (dependencies before the files that use them). The compiler processes left to right — if a file is referenced but wasn't passed, it's a compile error. No automatic file searching.
@@ -1279,14 +1324,14 @@ All files must be passed to the compiler explicitly, in leaf-first order (depend
 ### Built-in Math Module
 
 ```darim
-import Math as math
+import Math as math;
 
-math.ceil(4.3)       // 5
-math.floor(4.7)      // 4
-math.abs(-9)         // 9
-math.sqrt(16)        // 4.0
-math.random()        // float between 0.0 and 1.0
-math.random(1, 10)   // integer between 1 and 10
+math.ceil(4.3);       # 5
+math.floor(4.7);      # 4
+math.abs(-9);         # 9
+math.sqrt(16);        # 4.0
+math.random();        # float between 0.0 and 1.0
+math.random(1, 10);   # integer between 1 and 10
 ```
 
 > **🔮 Future Enhancement:** Selective imports (`include math { add, sub }`), a package system with folder-based module resolution, and a dependency resolution mechanism.
@@ -1298,39 +1343,39 @@ math.random(1, 10)   // integer between 1 and 10
 ### Display & Input
 
 ```darim
-display("value: ", x)       // print without newline
-displayLn("done")           // print with newline
+display("value: ", x);       # print without newline
+displayLn("done");           # print with newline
 
-var word = read("Enter word: ")       // reads until whitespace
-var line = readln("Enter line: ")     // reads until newline
+var word = read("Enter word: ");       # reads until whitespace
+var line = readln("Enter line: ");     # reads until newline
 ```
 
 ### Collection Utilities
 
 ```darim
-length(collection)              // number of elements
+length(collection);              # number of elements
 
-reverse(arr)                    // in-place reversal (void)
-sortAsc(arr)                    // in-place ascending sort
-sortDesc(arr)                   // in-place descending sort
-sortAsc(arr, item => item[1])   // sort by key (lambda)
-sortDesc(arr, item => item[1])  // descending by key
+reverse(arr);                    # in-place reversal (void)
+sortAsc(arr);                    # in-place ascending sort
+sortDesc(arr);                   # in-place descending sort
+sortAsc(arr, (item: tuple): num { return item[1]; });   # sort by key (lambda)
+sortDesc(arr, (item: tuple): num { return item[1]; });  # descending by key
 
-map(arr, x => x * 2)            // returns new transformed array
-reduce(arr, (a, b) => a + b)    // folds to single value
+map(arr, (x: num): num { return x * 2; });            # returns new transformed array
+reduce(arr, (a: num, b: num): num { return a + b; }); # folds to single value
 ```
 
 ### Math
 
 ```darim
-import Math as math
+import Math as math;
 
-math.ceil(x)
-math.floor(x)
-math.abs(x)
-math.sqrt(x)
-math.random()         // [0.0, 1.0)
-math.random(a, b)     // integer in [a, b]
+math.ceil(x);
+math.floor(x);
+math.abs(x);
+math.sqrt(x);
+math.random();         # [0.0, 1.0)
+math.random(a, b);     # integer in [a, b]
 ```
 
 ---
@@ -1342,47 +1387,47 @@ Darim supports text-mode file I/O. Files are treated as Unicode text.
 ### Opening Files
 
 ```darim
-var f = openFile("data.txt", FileMode.Read)
-var w = openFile("out.txt", FileMode.Write)
-var a = openFile("log.txt", FileMode.Append)
+var f = openFile("data.txt", FileMode.Read);
+var w = openFile("out.txt", FileMode.Write);
+var a = openFile("log.txt", FileMode.Append);
 ```
 
 ### Reading
 
 ```darim
-// Read entire file as a string (use heap string for large files)
-var content = new ""
-content = readFile(f)
+# Read entire file as a string (use heap string for large files)
+var content = new "";
+content = readFile(f);
 
-// Read line by line
+# Read line by line
 while !isEof(readLine(f)): {
-    var line = readLine(f)
-    displayLn(line)
+    var line = readLine(f);
+    displayLn(line);
 }
 ```
 
 ### Writing
 
 ```darim
-var f = openFile("output.txt", FileMode.Write)
-writeFile(f, "Hello, file!")
-writeLine(f, "This writes a line with newline")
+var f = openFile("output.txt", FileMode.Write);
+writeFile(f, "Hello, file!");
+writeLine(f, "This writes a line with newline");
 ```
 
 ### Practical Example
 
 ```darim
 void main(args: tuple) {
-    var inputPath: string = args[0]
-    var file = openFile(inputPath, FileMode.Read)
+    var inputPath: string = args[0];
+    var file = openFile(inputPath, FileMode.Read);
 
-    var lineCount = 0
+    var lineCount = 0;
     while !isEof(readLine(file)): {
-        var line = readLine(file)
-        lineCount = lineCount + 1
-        displayLn(lineCount, ": ", line)
+        var line = readLine(file);
+        lineCount = lineCount + 1;
+        displayLn(lineCount, ": ", line);
     }
-    displayLn("Total lines: ", lineCount)
+    displayLn("Total lines: ", lineCount);
 }
 ```
 
@@ -1395,18 +1440,18 @@ Darim programs can communicate with external applications (e.g., a web server) t
 ### Emitting Events
 
 ```darim
-// Send an event named "response" with a string payload
-emitEvent("response", "status:ok")
+# Send an event named "response" with a string payload
+emitEvent("response", "status:ok");
 ```
 
 ### Listening for Events
 
 ```darim
-// Register a handler for events named "request"
-onEvent("request", data => {
-    displayLn("received: ", data)
-    return "acknowledged"   // return a string response, or 0 for void
-})
+# Register a handler for events named "request"
+onEvent("request", (data: string): string {
+    displayLn("received: ", data);
+    return "acknowledged";   # return a string response, or 0 for void
+});
 ```
 
 The handler receives the event payload as a string and **must return** either:
@@ -1417,18 +1462,18 @@ The handler receives the event payload as a string and **must return** either:
 
 ```darim
 void main(args: tuple) {
-    displayLn("Server started")
+    displayLn("Server started");
 
-    onEvent("compute", data => {
-        var n: num = data   // implicit cast from string to number
-        var result = n * n
-        return result       // returned as response
-    })
+    onEvent("compute", (data: string): num {
+        var n: num = data as num;   # cast from string to number
+        var result = n * n;
+        return result;              # returned as response
+    });
 
-    onEvent("shutdown", _ => {
-        displayLn("Shutting down")
-        return 0
-    })
+    onEvent("shutdown", (data: string): num {
+        displayLn("Shutting down");
+        return 0;
+    });
 }
 ```
 
@@ -1441,27 +1486,27 @@ void main(args: tuple) {
 The compiler evaluates pure constant expressions at compile time and replaces them with the result. This applies when all operands are `final` variables or numeric/string literals:
 
 ```darim
-final WIDTH  = 800
-final HEIGHT = 600
-final AREA   = WIDTH * HEIGHT   // compiled as: 480000
+final WIDTH  = 800;
+final HEIGHT = 600;
+final AREA   = WIDTH * HEIGHT;   # compiled as: 480000
 
-// Used in expressions:
-return WIDTH / 2 + 5   // compiled as: 405
+# Used in expressions:
+return WIDTH / 2 + 5;   # compiled as: 405
 ```
 
 If any operand is a `var`, the expression is evaluated at runtime:
 
 ```darim
-var width = 800
-return width / 2 + 5   // NOT folded; computed at runtime
+var width = 800;
+return width / 2 + 5;   # NOT folded; computed at runtime
 ```
 
 **Nested folding:**
 
 ```darim
-final A = 2
-final B = 3
-final C = A ^ B + 10 / 2    // 2^3 + 5 = 13 — folded at compile time
+final A = 2;
+final B = 3;
+final C = A ^ B + 10 / 2;    # 2^3 + 5 = 13 — folded at compile time
 ```
 
 > **🔮 Future Enhancements:**
@@ -1484,11 +1529,11 @@ The compiler catches:
 - Invalid use of `visible` or `include`
 
 ```darim
-var x: num = "hello"   // ERROR: cannot assign string to num
-var y = undefinedVar   // ERROR: undefinedVar not declared
+var x: num = "hello";   # ERROR: cannot assign string to num
+var y = undefinedVar;   # ERROR: undefinedVar not declared
 
 num add(a: num, b: num) {
-    return "result"    // ERROR: return type mismatch
+    return "result";    # ERROR: return type mismatch
 }
 ```
 
@@ -1497,29 +1542,29 @@ num add(a: num, b: num) {
 Some errors can only be detected at runtime:
 
 ```darim
-// Index out of bounds
-var arr = new {1, 2, 3}
-arr[5] = 99              // RUNTIME ERROR: index 5 out of bounds (size 3)
+# Index out of bounds
+var arr = new {1, 2, 3};
+arr[5] = 99;              # RUNTIME ERROR: index 5 out of bounds (size 3)
 
-// Type cast failure
-var mixed = new {1, "hello", 3}
-var n: num = mixed[1]    // RUNTIME ERROR: cannot cast "hello" to num
+# Type cast failure
+var mixed = new {1, "hello", 3};
+var n = mixed.num(1);     # RUNTIME ERROR: cannot cast "hello" to num
 
-// Map key not found
-var m = new Map("a", 1)
-mapGet(m, "z")           // RUNTIME ERROR: key "z" not found (use default form)
+# Map key not found
+var m = new Map("a", 1);
+mapGet(m, "z");           # RUNTIME ERROR: key "z" not found (use default form)
 
-// Set type mismatch
-var s = new Set(1, 2, 3)
-setPut(s, "text")        // RUNTIME ERROR: type mismatch in set
+# Set type mismatch
+var s = new Set(1, 2, 3);
+setPut(s, "text");        # RUNTIME ERROR: type mismatch in set
 
-// Null dereference (stack value returned from function)
+# Null dereference (stack value returned from function)
 {num} bad() {
-    var arr = {1, 2, 3}
-    return arr
+    var arr = {1, 2, 3};
+    return arr;
 }
-var a = bad()
-var x: num = a[0]        // RUNTIME ERROR: null dereference
+var a = bad();
+var x = a.num(0);         # RUNTIME ERROR: null dereference
 ```
 
 ### Null Safety
@@ -1527,21 +1572,21 @@ var x: num = a[0]        // RUNTIME ERROR: null dereference
 Returning stack-allocated reference types results in `null` at the call site. Darim does not prevent this at compile time in Version 1 — it is the programmer's responsibility. Following the [return safety rules](#return-safety) in the Memory Model section prevents these issues.
 
 ```darim
-// Safe pattern: check before use
-var result = someFunctionThatMightReturnNull()
+# Safe pattern: check before use
+var result = someFunctionThatMightReturnNull();
 if result: {
-    // proceed safely
+    # proceed safely
 }
 ```
 
 > **🔮 Future Enhancement:** Structured `try / catch` exception handling:
 > ```darim
 > try {
->     var n = mapGet(m, "key")
->     displayLn(n)
+>     var n = mapGet(m, "key");
+>     displayLn(n);
 > }
 > catch e {
->     displayLn("Error: ", e)
+>     displayLn("Error: ", e);
 > }
 > ```
 
@@ -1555,7 +1600,7 @@ Every Darim program must define a `main` function. It is the single entry point:
 
 ```darim
 void main(args: tuple) {
-    displayLn("Program started")
+    displayLn("Program started");
 }
 ```
 
@@ -1564,14 +1609,14 @@ void main(args: tuple) {
 ### CLI Argument Examples
 
 ```darim
-// run with: darim run app.d Alice 30
+# run with: darim run app.d Alice 30
 
 void main(args: tuple) {
-    var name: string = args[0]    // "Alice"
-    var age: string  = args[1]    // "30"
+    var name: string = args[0];    # "Alice"
+    var age: string  = args[1];    # "30"
 
-    displayLn("Name: ", name)
-    displayLn("Age:  ", age)
+    displayLn("Name: ", name);
+    displayLn("Age:  ", age);
 }
 ```
 
@@ -1579,9 +1624,9 @@ Arguments are always received as strings. Cast explicitly if needed:
 
 ```darim
 void main(args: tuple) {
-    var count: num = args[0]   // implicit cast string → num
+    var count: num = args[0] as num;   # cast string → num
     for var i in 1..count + 1: {
-        displayLn(i)
+        displayLn(i);
     }
 }
 ```
@@ -1589,20 +1634,21 @@ void main(args: tuple) {
 ### Multi-file Programs
 
 ```darim
-// utils.d
-visible string repeat(s: string, n: num) {
-    var result = ""
+# utils.d
+string repeat(s: string, n: num) {
+    var result = "";
     for var i in 1..n + 1: {
-        result = result + s
+        result = result + s;
     }
-    return result
+    return result;
 }
+visible repeat;
 
-// main.d
-include utils as u
+# main.d
+include utils as u;
 
 void main(args: tuple) {
-    displayLn(u.repeat("ab", 3))   // "ababab"
+    displayLn(u.repeat("ab", 3));   # "ababab"
 }
 ```
 
@@ -1619,7 +1665,7 @@ void main(args: tuple) {
 | `void`    | Function returns nothing                 |
 | `num`     | Number type                              |
 | `string`  | String type                              |
-| `boolean` | Boolean type                             |
+| `bool`    | Boolean type                             |
 | `enum`    | Define enumeration                       |
 | `if`      | Conditional                              |
 | `elif`    | Else-if branch                           |
@@ -1627,21 +1673,19 @@ void main(args: tuple) {
 | `for`     | For loop                                 |
 | `while`   | While loop                               |
 | `break`   | Exit current loop                        |
-| `switch`  | Pattern match / switch expression        |
-| `case`    | Match arm                                |
-| `default` | Fallback match arm                       |
+| `match`   | Match expression                         |
 | `return`  | Return value from function               |
 | `new`     | Heap-allocate a value                    |
-| `include` | Import another file as namespace         |
-| `visible` | Export a symbol to other files           |
-| `import`  | Import a built-in module (e.g. Math)     |
-| `as`      | Alias for include/import                 |
+| `include` | Include another file — requires `as`     |
+| `visible` | Mark a declared symbol as exported       |
+| `import`  | Import a built-in module — requires `as <alias>` (e.g. `import Math as math`) |
+| `as`      | Cast operator / alias for include/import |
 | `in`      | Loop iteration / range                   |
 | `bet`     | Between operator                         |
 | `and`     | Logical AND                              |
 | `or`      | Logical OR                               |
 | `not`     | Logical NOT                              |
-| `lambda`  | Lambda type annotation                   |
+| `func`    | Function type keyword                    |
 
 ### Built-in Functions at a Glance
 

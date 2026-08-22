@@ -8,9 +8,8 @@ import com.doruk.parser.nodes.components.Parameter;
 import java.util.List;
 
 public record FunctionDeclStmt(
-        Token qualifier, // visible or not
         List<TypeNode> returnTypes, // if void, then only one
-        Token name,
+        Token identifier,
         List<Parameter> parameters,
         BlockStmt body
 ) implements Stmt {

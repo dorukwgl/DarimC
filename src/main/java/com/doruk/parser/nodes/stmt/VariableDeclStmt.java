@@ -8,7 +8,6 @@ import com.doruk.parser.nodes.components.VariableDecl;
 import java.util.List;
 
 public record VariableDeclStmt(
-        Token qualifier, // visible or not/ can be null
         Token modifier, // var / final
         List<VariableDecl> declarations,
         Expr initializer

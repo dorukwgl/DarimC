@@ -23,11 +23,11 @@ Pipeline: **Source → Lexer → Parser → AST → Bytecode Compiler → VM**
 - [ ] Implement `Token` struct — type, lexeme, line, column
   > Always store line and column. Error messages without source location are useless.
 - [ ] Scan single-character tokens
-- [ ] Scan two-character tokens (`==`, `!=`, `<=`, `>=`, `->`, `=>`, `//`, `..`)
+- [ ] Scan two-character tokens (`==`, `!=`, `<=`, `>=`, `+=`, `-=`, `*=`, `/=`, `%=`, `^=`, `++`, `--`, `&&`, `||`, `//`, `..`)
 - [ ] Scan number literals (integer and float)
 - [ ] Scan string literals with `\"` escape handling
 - [ ] Scan identifiers and keywords (identifier → check keyword table)
-- [ ] Skip whitespace and `//` line comments
+- [ ] Skip whitespace and `#` line comments
 - [ ] Handle newlines as implicit statement terminators
   > Only emit a newline token after tokens that can end a statement (identifiers, literals, `)`, `}`, `break`, `return`). Swallow all others as whitespace.
 - [ ] Emit `TOKEN_ERROR` for unrecognized characters (don't throw — let the parser report it)
@@ -40,8 +40,10 @@ Pipeline: **Source → Lexer → Parser → AST → Bytecode Compiler → VM**
 
 ### 2.1 AST Nodes
 
-- [ ] Define expression nodes: literals, identifier, binary, unary, call, index, member access, assign, lambda, between, switch-expr
-- [ ] Define statement nodes: var/final decl, block, if/elif/else, for-range, for-in, while, break, return, switch-stmt, function decl, enum decl, include, import
+- [ ] Define expression nodes: literals, identifier, binary, unary, call, index, member access, assign, lambda, bet, match-expr, cast, ternary, range
+- [ ] Define statement nodes: var/final decl, block, if/elif/else, for-range, for-in, while, break, return, function decl, enum decl, include, import
+- [ ] `Program` node is the per-file root: `List<Stmt> statements` + `List<Token> exports` (names from `visible <name>;`). `visible` is **not** a statement node — the parser collects the name into `Program.exports`
+  > Each source file parses to its own `Program`. Passes run over all programs together: parse → typed AST → syntax analysis → final semantics analysis, which rejects calls to a symbol in another program that isn't in that program's `exports`.
 - [ ] Every node stores line/column from its leading token
 
 ### 2.2 Parser Infrastructure
@@ -52,10 +54,30 @@ Pipeline: **Source → Lexer → Parser → AST → Bytecode Compiler → VM**
 ### 2.3 Pratt Expression Parser
 
 - [ ] Core loop: prefix handler table + infix handler table + binding powers
-- [ ] Prefix handlers: literals, identifiers, unary `!`/`not`/`-`, grouping `()`, `new`, lambda detection
-- [ ] Infix handlers: binary arithmetic and comparison ops, `and`/`or`, call `()`, index `[]`, member `.`, assign `=`
-- [ ] `bet` operator (three operands: pivot, lo, hi)
+- [ ] Prefix handlers: literals, identifiers, unary `!`/`not`/`-`, grouping `()`, `new`; lambda detection — `(` + typed params + `: returnType` starts a lambda
+- [ ] Infix handlers: binary arithmetic and comparison ops, `&&`/`and`, `||`/`or`, call `()`, index `[]`, member `.`, assign `=`, compound assigns, `as`, `..`, `?:`, `++`/`--`, typed accessors
+- [ ] `bet` operator (three operands: pivot, lo, hi — comma-separated)
 - [ ] `^` as right-associative
+- [ ] Precedence table (loosest → tightest; right-associative where noted)
+
+  | Tightness | Operators                                            | Assoc |
+  |-----------|------------------------------------------------------|-------|
+  | loosest   | `=` `+=` `-=` `*=` `/=` `^=` `%=`                    | right |
+  |           | `?:`                                                 | right |
+  |           | `\|\|` `or`                                          | left  |
+  |           | `&&` `and`                                           | left  |
+  |           | `bet` (x bet lo, hi)                                 | —     |
+  |           | `==` `!=`                                            | left  |
+  |           | `<` `>` `<=` `>=`                                    | left  |
+  |           | `..`                                                 | left  |
+  |           | `+` `-`                                              | left  |
+  |           | `*` `/` `%` `//`                                     | left  |
+  |           | `^`                                                  | right |
+  |           | `as`                                                 | —     |
+  |           | `!` `not` `-` `+` prefix, `++` `--` prefix           | —     |
+  | tightest  | `()` `[]` `.` postfix, `++` `--` postfix             | left  |
+
+  Prefix unary binds tighter than `^`, so `-2 ^ 2` parses as `(-2) ^ 2` = `4`. Assignment is the loosest, so `var a = 5 >= b` gives `a` the bool result of `5 >= b`.
 
 ### 2.4 Statement Parsers (Recursive Descent)
 
@@ -67,11 +89,11 @@ Pipeline: **Source → Lexer → Parser → AST → Bytecode Compiler → VM**
 - [ ] `while` loop
 - [ ] `break`
 - [ ] `return` — single and multi-value (`return a, b`)
-- [ ] `switch` — as statement and as expression (`var x = switch ...`)
+- [ ] `match` expression — pattern arms with `{ block }` bodies, `_` as the default arm
 - [ ] Function declarations — return types, typed params, default params, variadic params
 - [ ] Enum declarations
-- [ ] `include` / `import`
-- [ ] `visible` modifier on functions and variables
+- [ ] `include` / `import` — `import` always requires `as <alias>`
+- [ ] `visible` as a separate statement — `visible myName;` marks an already-declared symbol as exported
 
 **Test:** run `darimc file.d --dump-ast`, visually verify tree shape matches source.
 
@@ -110,10 +132,11 @@ Pipeline: **Source → Lexer → Parser → AST → Bytecode Compiler → VM**
 - [ ] Comparison and logical ops
 - [ ] `bet` operator
 - [ ] Assignment
-- [ ] Index access and assignment (`arr[i]`, `arr[i] = v`)
+- [ ] Index access and assignment (`arr[i]`, `arr[i] = v`); typed accessors `arr.num(i)` / `arr.bool(i)` / `arr.string(i)` — VM casts, throws on failure
 - [ ] Member access (`map.key`, `obj.field`)
 - [ ] Function call — positional args, multi-return capture, `_` discard
 - [ ] `new` — dynamic array, heap tuple, heap string, map, set
+- [ ] Tuple construction — `Tuple(a, b, c)` (stack), `new Tuple(a, b, c)` (heap); no paren-literal `(1, 2, 3)` syntax
 
 ### 4.3 Statements
 
@@ -125,8 +148,7 @@ Pipeline: **Source → Lexer → Parser → AST → Bytecode Compiler → VM**
 - [ ] Break — emit forward jump, patch to loop exit
   > Use a stack of break-patch locations per loop. On loop exit, patch them all.
 - [ ] Return — single and multi-value (place results in r0, r1, …)
-- [ ] Switch statement — sequential equality checks with jump-chain
-- [ ] Switch expression — same, but result lands in a register
+- [ ] Match expression — pattern arms compile to equality checks with a jump-chain; result lands in a register
 
 ### 4.4 Functions
 
@@ -135,7 +157,8 @@ Pipeline: **Source → Lexer → Parser → AST → Bytecode Compiler → VM**
 - [ ] Default arguments — compiler inserts constant at each call site that omits the arg
 - [ ] Variadic params — compiler wraps trailing args into a tuple before the call
 - [ ] Lambdas compile to named anonymous chunks; a `LOAD_FUNC` instruction loads the reference
-  > Lambdas don't capture variables (no closures in v1). Warn if a lambda body references a local from an outer function — that variable won't survive the outer scope.
+  > Syntax: `(a: num, b: num): num { ... }` — inline (unnamed) or assigned via `final name = ...`. Function types use the `func` keyword: `func(num, num): num`, `func(): void`, `func(num, string): num, string`.
+- [ ] Lambda capture — no closures are formed. A lambda can read globals and any variable still in scope where it runs (like Java). A `final` constant can be captured by copying its value into the lambda's frame — the only safe way for a lambda to outlive its scope.
 
 ### 4.5 Types and Structures
 
@@ -185,39 +208,3 @@ Pipeline: **Source → Lexer → Parser → AST → Bytecode Compiler → VM**
 - [ ] Compile errors — type mismatch, undeclared variable, return type mismatch, unsafe return of stack type
 - [ ] Collect and report all errors before aborting — don't stop at first error
 - [ ] Runtime errors — index out of bounds, key not found, type cast failure, null dereference — all include source line from chunk line info
-
----
-
-## Build Order (recommended)
-
-Work through these in sequence. Each step is independently testable before moving on.
-
-1. Lexer + `--dump-tokens`
-2. Pratt parser for arithmetic expressions + `--dump-ast`
-3. Bytecode design decisions (format, instruction set)
-4. Emit arithmetic + `DISPLAY_LN` + `HALT` — first end-to-end program works
-5. Both `--readable` (`.dba`) and binary (`.dbc`) output working
-6. Variables — `var`, `final`, assignment
-7. Booleans, comparisons, logical ops
-8. `if` / `elif` / `else`
-9. `while` loop
-10. Functions — basic single return
-11. Multi-value return
-12. `for` range loop + `break`
-13. `for-in` loop
-14. Dynamic arrays + `new`
-15. Fixed arrays
-16. Tuples
-17. Strings + string methods
-18. Lambdas
-19. `switch` statement + expression
-20. Maps + Sets
-21. Enums
-22. Constant folding pass
-23. Default and variadic function args
-24. `bet` operator
-25. Modules (`include`, `import Math`)
-26. Standard library bindings
-27. File I/O
-28. Event system
-29. Error reporting polish
