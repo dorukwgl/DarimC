@@ -20,7 +20,7 @@ public class Lexer {
     private final Map<String, TokenType> tokenMap;
     private final Set<Character> validNumTrailingTokens =
             new HashSet<>(Set.of(
-                    ' ', '\t', '\n', ')', ']', '}', '+', '-', '*', '/', '%', '=', '!', '<', '>', '&', '|', '#', ',', ':', '^', '?'
+                    ' ', '\t', '\n', ')', ']', '}', '+', '-', '*', '/', '%', '=', '!', '<', '>', '&', '|', '#', ',', ':', '^', '?', ';'
             ));
 
     public Lexer(String fileName, String source) {

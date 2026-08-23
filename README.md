@@ -683,19 +683,19 @@ Higher tiers evaluate first. Within a tier, operators are left-associative unles
 | Tier  | Operators                                   | Associativity |
 |-------|---------------------------------------------|---------------|
 | 1st   | `()` call, `[]` index, `.` member, `++` `--` postfix | left          |
-| 2nd   | `!` `not` `-` `+` prefix unary, `++` `--` prefix    | —             |
-| 3rd   | `as` cast                                    | —             |
-| 4th   | `^` exponentiation                           | **right**     |
-| 5th   | `*` `/` `%` `//`                             | left          |
-| 6th   | `+` `-`                                      | left          |
-| 7th   | `..` range                                   | left          |
-| 8th   | `<` `>` `<=` `>=`                            | left          |
-| 9th   | `==` `!=`                                    | left          |
-| 10th  | `bet` (x bet lo, hi)                         | —             |
-| 11th  | `&&` / `and`                                 | left          |
-| 12th  | `\|\|` / `or`                                | left          |
-| 13th  | `?:` ternary                                 | right         |
-| 14th  | `=` `+=` `-=` `*=` `/=` `^=` `%=`            | right         |
+| 2nd   | `!` `not` `-` `+` prefix unary, `++` `--` prefix   | —             |
+| 3rd   | `as` cast                                   | —             |
+| 4th   | `^` exponentiation                          | **right**     |
+| 5th   | `*` `/` `%` `//`                            | left          |
+| 6th   | `+` `-`                                     | left          |
+| 7th   | `..` range                                  | left          |
+| 8th   | `<` `>` `<=` `>=`                           | left          |
+| 9th   | `==` `!=`                                   | left          |
+| 10th  | `bet` (x bet lo, hi)                        | —             |
+| 11th  | `&&` / `and`                                | left          |
+| 12th  | `\|\|` / `or`                               | left          |
+| 13th  | `?` ternary                                 | right         |
+| 14th  | `=` `+=` `-=` `*=` `/=` `^=` `%=`           | right         |
 
 Prefix unary binds **tighter than `^`**, so `-2 ^ 2` parses as `(-2) ^ 2` = `4` (not `-(2 ^ 2)`). Assignment is the loosest operator, so `var a = 5 >= b` gives `a` the bool result of `5 >= b`.
 

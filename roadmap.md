@@ -60,22 +60,22 @@ Pipeline: **Source → Lexer → Parser → AST → Bytecode Compiler → VM**
 - [ ] `^` as right-associative
 - [ ] Precedence table (loosest → tightest; right-associative where noted)
 
-  | Tightness | Operators                                            | Assoc |
-  |-----------|------------------------------------------------------|-------|
-  | loosest   | `=` `+=` `-=` `*=` `/=` `^=` `%=`                    | right |
-  |           | `?:`                                                 | right |
-  |           | `\|\|` `or`                                          | left  |
-  |           | `&&` `and`                                           | left  |
-  |           | `bet` (x bet lo, hi)                                 | —     |
-  |           | `==` `!=`                                            | left  |
-  |           | `<` `>` `<=` `>=`                                    | left  |
-  |           | `..`                                                 | left  |
-  |           | `+` `-`                                              | left  |
-  |           | `*` `/` `%` `//`                                     | left  |
-  |           | `^`                                                  | right |
-  |           | `as`                                                 | —     |
-  |           | `!` `not` `-` `+` prefix, `++` `--` prefix           | —     |
-  | tightest  | `()` `[]` `.` postfix, `++` `--` postfix             | left  |
+  | Tightness | Operators                                           | Assoc |
+  |-----------|-----------------------------------------------------|-------|
+  | loosest   | `=` `+=` `-=` `*=` `/=` `^=` `%=`                   | right |
+  |           | `?`                                                 | right |
+  |           | `\|\|` `or`                                         | left  |
+  |           | `&&` `and`                                          | left  |
+  |           | `bet` (x bet lo, hi)                                | —     |
+  |           | `==` `!=`                                           | left  |
+  |           | `<` `>` `<=` `>=`                                   | left  |
+  |           | `..`                                                | left  |
+  |           | `+` `-`                                             | left  |
+  |           | `*` `/` `%` `//`                                    | left  |
+  |           | `^`                                                 | right |
+  |           | `as`                                                | —     |
+  |           | `!` `not` `-` `+` prefix, `++` `--` prefix          | —     |
+  | tightest  | `()` `[]` `.` postfix, `++` `--` postfix            | left  |
 
   Prefix unary binds tighter than `^`, so `-2 ^ 2` parses as `(-2) ^ 2` = `4`. Assignment is the loosest, so `var a = 5 >= b` gives `a` the bool result of `5 >= b`.
 
